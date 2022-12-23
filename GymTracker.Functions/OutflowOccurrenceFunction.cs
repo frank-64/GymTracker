@@ -33,7 +33,7 @@ namespace GymTracker.Functions
             outflowAmount = outflowAmount ?? data?.amount;
 
             log.LogInformation($"An outflow of {outflowAmount} person(s) has left the gym. Attempting to update overall occupancy.");
-            _trackingService.ManageOutflow(int.Parse(outflowAmount));
+            await _trackingService.ManageOutflow(int.Parse(outflowAmount));
 
             string responseMessage = string.IsNullOrEmpty(outflowAmount)
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
