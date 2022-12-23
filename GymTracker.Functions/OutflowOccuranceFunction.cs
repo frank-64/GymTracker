@@ -10,23 +10,23 @@ using Newtonsoft.Json;
 
 namespace GymTracker.Functions
 {
-    public static class InfluxOccuranceFunction
+    public static class OutflowOccuranceFunction
     {
-        [FunctionName("InfluxOccuranceFunction")]
+        [FunctionName("OutflowOccuranceFunction")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function,"post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
-            string influxAmount = req.Query["name"];
+            string outflowAmount = req.Query["name"];
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            influxAmount = influxAmount ?? data?.name;
+            outflowAmount = outflowAmount ?? data?.name;
 
-            string responseMessage = string.IsNullOrEmpty(influxAmount)
+            string responseMessage = string.IsNullOrEmpty(outflowAmount)
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"An influx of {influxAmount} person(s) entering the gym was recorded successfully.";
+                : $"An outflow of {outflowAmount} person(s) entering the gym was recorded successfully.";
 
             return new OkObjectResult(responseMessage);
         }
