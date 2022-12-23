@@ -69,6 +69,10 @@ namespace GymTracker.Domain.Services
             {
                 gymDayTracker.CurrentGymOccupancy -= amount;
             }
+            else
+            {
+                gymDayTracker.CurrentGymOccupancy = 0;
+            }
             gymDayTracker.LastModified = DateTimeOffset.UtcNow;
 
             await _cosmosRepository.UpsertItemAsync(gymDayTracker);
