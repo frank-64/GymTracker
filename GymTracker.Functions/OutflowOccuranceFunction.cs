@@ -7,13 +7,21 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using GymTracker.Domain.Interfaces;
 
 namespace GymTracker.Functions
 {
-    public static class OutflowOccuranceFunction
+    public class OutflowOccuranceFunction
     {
+        private readonly ITrackingService _trackingService;
+
+        public OutflowOccuranceFunction(ITrackingService trackingService)
+        {
+            _trackingService = trackingService;
+        }
+
         [FunctionName("OutflowOccuranceFunction")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function,"post", Route = null)] HttpRequest req,
             ILogger log)
         {
@@ -23,6 +31,9 @@ namespace GymTracker.Functions
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             outflowAmount = outflowAmount ?? data?.amount;
+
+            log.LogInformation($"An outflow of {outflowAmount} person(s) has left the gym. Attempting to update overall occupancy.");
+            _trackingService.ManageOutflow(int.Parse(outflowAmount));
 
             string responseMessage = string.IsNullOrEmpty(outflowAmount)
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."

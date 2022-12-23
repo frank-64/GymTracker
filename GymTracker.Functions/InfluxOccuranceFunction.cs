@@ -7,13 +7,23 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using GymTracker.Domain.Entities;
+using GymTracker.Domain.Interfaces;
 
 namespace GymTracker.Functions
 {
-    public static class InfluxOccuranceFunction
+
+    public class InfluxOccuranceFunction
     {
+        private readonly ITrackingService _trackingService;
+
+        public InfluxOccuranceFunction(ITrackingService trackingService)
+        {
+            _trackingService = trackingService;
+        }
+
         [FunctionName("InfluxOccuranceFunction")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function,"post", Route = null)] HttpRequest req,
             ILogger log)
         {
@@ -24,10 +34,13 @@ namespace GymTracker.Functions
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             influxAmount = influxAmount ?? data?.amount;
 
+            log.LogInformation($"An influx of {influxAmount} person(s) has entered the gym. Attempting to update overall occupancy.");
+            _trackingService.ManageInflux(int.Parse(influxAmount));
+
             string responseMessage = string.IsNullOrEmpty(influxAmount)
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
                 : $"An influx of {influxAmount} person(s) entering the gym was recorded successfully.";
-
+            
             return new OkObjectResult(responseMessage);
         }
     }
