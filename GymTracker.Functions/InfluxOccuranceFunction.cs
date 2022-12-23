@@ -18,7 +18,7 @@ namespace GymTracker.Functions
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
-            string influxAmount = req.Query["name"];
+            string influxAmount = req.Query["amount"];
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
