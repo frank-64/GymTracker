@@ -11,6 +11,8 @@ namespace GymTracker.Domain.Entities
         public int CurrentGymOccupancy { get; set; }
         public int HighestGymOccupancy { get; set; }
         public DateTimeOffset CurrentDate { get; set; }
+        public DateTimeOffset LastModified { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
         public string DayOfWeek => CurrentDate.DayOfWeek.ToString();
         public override string ToString()
         {

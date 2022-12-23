@@ -77,32 +77,38 @@ namespace CosmosGettingStartedTutorial
         // <AddItemsToContainerAsync>
         public async Task AddItemsToContainerAsync(GymDayTracker gymDayTracker)
         {
-            bool itemExists = await DoesItemExistAsync(gymDayTracker.PartitionKey, gymDayTracker.Id);
+            var item = await GetItemIfExistAsync(gymDayTracker.PartitionKey, gymDayTracker.Id);
             
-            if (itemExists)
+            if (item != null)
             {
                 Console.WriteLine("Item in database with id: {0} already exists\n");
             }
             else
             {
-                ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.CreateItemAsync<GymDayTracker>(gymDayTracker, new PartitionKey(gymDayTracker.PartitionKey));
+                try
+                {
+                    ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.CreateItemAsync<GymDayTracker>(gymDayTracker, new PartitionKey(gymDayTracker.PartitionKey));
+                    // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse. We can also access the RequestCharge property to see the amount of RUs consumed on this request.
+                    Console.WriteLine("Created item in database with id: {0} Operation consumed {1} RUs.\n", gymDayTrackerResponse.Resource.Id, gymDayTrackerResponse.RequestCharge);
 
-                // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse. We can also access the RequestCharge property to see the amount of RUs consumed on this request.
-                Console.WriteLine("Created item in database with id: {0} Operation consumed {1} RUs.\n", gymDayTrackerResponse.Resource.Id, gymDayTrackerResponse.RequestCharge);
+                }catch(Exception ex)
+                {
+                    var t = ex.Message;
+                }
             }
         }
 
-        public async Task<bool> DoesItemExistAsync(string partitionKey, string id)
+        public async Task<ItemResponse<GymDayTracker>> GetItemIfExistAsync(string partitionKey, string id)
         {
             try
             {
                 // Read the item to see if it exists.  
                 ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.ReadItemAsync<GymDayTracker>(id, new PartitionKey(partitionKey));
-                return true;
+                return gymDayTrackerResponse;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                return false;
+                return null;
             }
         }
         // </AddItemsToContainerAsync>

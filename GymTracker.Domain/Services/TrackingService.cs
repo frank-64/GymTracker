@@ -25,9 +25,23 @@ namespace GymTracker.Domain.Services
         }
         public async Task<int> GetCurrentOccupancy()
         {
-            throw new NotImplementedException();
+            await _cosmosRepository.CreateDatabaseAsync();
+            await _cosmosRepository.CreateContainerAsync();
+            DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            string currentMonth = currentDate.Month.ToString();
+            string stringDate = currentDate.ToString("dd-MM-yyyy");
+            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync(currentMonth, stringDate);
+            if (gymDayTracker == null)
+            {
+                Console.WriteLine("Do something as missing tracker file");
+                return 0;
+            }
+            else
+            {
+                return gymDayTracker.Resource.CurrentGymOccupancy;
+            }
         }
-        
+
         public async Task<int> GetTotalCapacity()
         {
             throw new NotImplementedException();
@@ -42,6 +56,7 @@ namespace GymTracker.Domain.Services
             {
                 gymDayTracker.HighestGymOccupancy = gymDayTracker.CurrentGymOccupancy;
             }
+            gymDayTracker.LastModified = DateTimeOffset.UtcNow;
 
             await _cosmosRepository.UpsertItemAsync(gymDayTracker);
         }
@@ -50,50 +65,68 @@ namespace GymTracker.Domain.Services
         {
             GymDayTracker gymDayTracker = itemResponse.Resource;
 
-            gymDayTracker.CurrentGymOccupancy -= amount;
+            if (gymDayTracker.CurrentGymOccupancy - amount >= 0)
+            {
+                gymDayTracker.CurrentGymOccupancy -= amount;
+            }
+            gymDayTracker.LastModified = DateTimeOffset.UtcNow;
 
             await _cosmosRepository.UpsertItemAsync(gymDayTracker);
         }
 
-        public async void ManageInflux(int amount)
+        public async Task ManageInflux(int amount)
         {
-            DateTimeOffset currentDateTimeOffset = DateTimeOffset.UtcNow;
-            bool exists = await _cosmosRepository.DoesItemExistAsync(currentDateTimeOffset.Month.ToString(), currentDateTimeOffset.ToString());
-            if (!exists)
+            await _cosmosRepository.CreateDatabaseAsync();
+            await _cosmosRepository.CreateContainerAsync();
+            DateTimeOffset utcNow = DateTimeOffset.UtcNow;
+            DateTimeOffset currentDate = new DateTimeOffset(utcNow.Year, utcNow.Month, utcNow.Day, 0, 0, 0, utcNow.Offset);
+            string currentMonth = utcNow.Month.ToString();
+            string stringDate = utcNow.ToString("dd-MM-yyyy");
+            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync(currentMonth, stringDate);
+            if (gymDayTracker == null)
             {
                 await _cosmosRepository.AddItemsToContainerAsync(new GymDayTracker
                 {
-                    Id = currentDateTimeOffset.ToString(),
-                    PartitionKey = currentDateTimeOffset.Month.ToString(),
-                    CurrentDate = currentDateTimeOffset,
+                    Id = stringDate,
+                    PartitionKey = currentMonth,
+                    CurrentDate = currentDate,
+                    LastModified = utcNow,
+                    CreatedOn = utcNow,
                     CurrentGymOccupancy = amount,
                     HighestGymOccupancy = amount,
                 });
             }
             else
             {
-                IncrementCountAsync(await _cosmosRepository.GetItemAsync(currentDateTimeOffset.Month.ToString(), currentDateTimeOffset.ToString()), amount);
+                IncrementCountAsync(gymDayTracker, amount);
             }
         }
 
-        public async void ManageOutflow(int amount)
+        public async Task ManageOutflow(int amount)
         {
-            DateTimeOffset currentDateTimeOffset = DateTimeOffset.UtcNow;
-            bool exists = await _cosmosRepository.DoesItemExistAsync(currentDateTimeOffset.Month.ToString(), currentDateTimeOffset.ToString());
-            if (!exists)
+            await _cosmosRepository.CreateDatabaseAsync();
+            await _cosmosRepository.CreateContainerAsync();
+            DateTimeOffset utcNow = DateTimeOffset.UtcNow;
+            DateTimeOffset currentDate = new DateTimeOffset(utcNow.Year, utcNow.Month, utcNow.Day, 0, 0, 0, utcNow.Offset);
+            string currentMonth = utcNow.Month.ToString();
+            string stringDate = utcNow.ToString("dd-MM-yyyy");
+            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync(currentMonth, stringDate);
+            if (gymDayTracker == null)
             {
                 await _cosmosRepository.AddItemsToContainerAsync(new GymDayTracker
                 {
-                    Id = currentDateTimeOffset.ToString(),
-                    PartitionKey = currentDateTimeOffset.Month.ToString(),
-                    CurrentDate = currentDateTimeOffset,
+                    Id = stringDate,
+                    PartitionKey = currentMonth,
+                    CurrentDate = currentDate,
+                    LastModified = utcNow,
+                    CreatedOn = utcNow,
                     CurrentGymOccupancy = amount,
                     HighestGymOccupancy = amount,
                 });
             }
             else
             {
-                DecrementCountAsync(await _cosmosRepository.GetItemAsync(currentDateTimeOffset.Month.ToString(), currentDateTimeOffset.ToString()), amount);
+                DecrementCountAsync(gymDayTracker, amount);
             }
         }
     }

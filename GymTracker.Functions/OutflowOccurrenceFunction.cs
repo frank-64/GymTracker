@@ -11,16 +11,16 @@ using GymTracker.Domain.Interfaces;
 
 namespace GymTracker.Functions
 {
-    public class OutflowOccuranceFunction
+    public class OutflowOccurrenceFunction
     {
         private readonly ITrackingService _trackingService;
 
-        public OutflowOccuranceFunction(ITrackingService trackingService)
+        public OutflowOccurrenceFunction(ITrackingService trackingService)
         {
             _trackingService = trackingService;
         }
 
-        [FunctionName("OutflowOccuranceFunction")]
+        [FunctionName("OutflowOccurrenceFunction")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function,"post", Route = null)] HttpRequest req,
             ILogger log)

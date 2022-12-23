@@ -15,7 +15,7 @@ namespace GymTracker.Domain.Interfaces
         Task UpsertItemAsync(GymDayTracker gymDayTracker);
         Task<ItemResponse<GymDayTracker>> GetItemAsync(string partitionKey, string id);
         Task AddItemsToContainerAsync(GymDayTracker gymDayTracker);
-        Task<bool> DoesItemExistAsync(string partitionKey, string id);
+        Task<ItemResponse<GymDayTracker>> GetItemIfExistAsync(string partitionKey, string id);
         Task DeleteFamilyItemAsync(string partitionKey, string id);
     }
 }

@@ -13,16 +13,16 @@ using GymTracker.Domain.Interfaces;
 namespace GymTracker.Functions
 {
 
-    public class InfluxOccuranceFunction
+    public class InfluxOccurrenceFunction
     {
         private readonly ITrackingService _trackingService;
 
-        public InfluxOccuranceFunction(ITrackingService trackingService)
+        public InfluxOccurrenceFunction(ITrackingService trackingService)
         {
             _trackingService = trackingService;
         }
 
-        [FunctionName("InfluxOccuranceFunction")]
+        [FunctionName("InfluxOccurrenceFunction")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function,"post", Route = null)] HttpRequest req,
             ILogger log)
@@ -35,7 +35,7 @@ namespace GymTracker.Functions
             influxAmount = influxAmount ?? data?.amount;
 
             log.LogInformation($"An influx of {influxAmount} person(s) has entered the gym. Attempting to update overall occupancy.");
-            _trackingService.ManageInflux(int.Parse(influxAmount));
+            await _trackingService.ManageInflux(int.Parse(influxAmount));
 
             string responseMessage = string.IsNullOrEmpty(influxAmount)
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."

@@ -8,8 +8,8 @@ namespace GymTracker.Domain.Interfaces
 {
     public interface ITrackingService
     {
-        public void ManageInflux(int amount);
-        public void ManageOutflow(int amount);
+        public Task ManageInflux(int amount);
+        public Task ManageOutflow(int amount);
         public Task<int> GetTotalCapacity();
         public Task<int> GetCurrentOccupancy();
     }
