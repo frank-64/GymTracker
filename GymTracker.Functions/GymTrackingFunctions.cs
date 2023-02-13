@@ -75,5 +75,20 @@ namespace GymTracker.Functions
 
             return new OkObjectResult(responseMessage);
         }
+
+        [FunctionName("OccupancyEvent")]
+        public async Task<IActionResult> OccupancyEvent(
+    [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "occupancyEvent")] HttpRequest req,
+    ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            log.LogInformation(requestBody);
+            log.LogInformation($"Event occurred: {data}");
+
+            return new OkObjectResult(data);
+        }
     }
 }
