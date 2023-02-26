@@ -6,7 +6,10 @@ function App() {
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [occupancyLevel, setOccupancy] = useState(0);
-  var headers = {};
+  var headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
 
   useEffect(() => {
     fetch(
