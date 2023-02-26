@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using GymTracker.Domain.Interfaces;
+using GymTracker.Domain.Entities;
 
 namespace GymTracker.Functions
 {
@@ -28,7 +29,8 @@ namespace GymTracker.Functions
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             var occupancy = await _trackingService.GetCurrentOccupancy();
-            return new OkObjectResult(occupancy);
+            var jsonOccupancy = JsonConvert.SerializeObject(new Occupancy { Value = occupancy });
+            return new OkObjectResult(jsonOccupancy);
         }
 
         [FunctionName("InfluxOccurrence")]
