@@ -12,28 +12,24 @@ function App() {
   };
 
   useEffect(() => {
-    fetch(
-      "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
-      {
-        method: "GET",
-        mode: "no-cors",
-        headers: headers,
-      }
-    )
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          setIsLoaded(true);
-          setOccupancy(result);
-        },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
-        (error) => {
-          setIsLoaded(true);
-          setError(error);
+    async function fetchData() {
+      fetch(
+        "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
+        {
+          mode: "cors",
+          method: "GET",
+          headers: headers
         }
-      );
+      ).then((response) => {
+        if (response.ok) {
+          response.json().then((json) => {
+            var occupancyObject = JSON.parse(json)
+            setOccupancy(occupancyObject.Value);
+          });
+        }
+      });
+    }
+    fetchData();
   }, []);
 
   return (
