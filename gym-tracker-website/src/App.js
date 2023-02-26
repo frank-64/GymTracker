@@ -2,8 +2,6 @@ import "./App.css";
 import ReactSpeedometer from "react-d3-speedometer";
 import { useState, useEffect } from "react";
 
-
-
 function App() {
   const [occupancyLevel, setOccupancy] = useState(0);
   var headers = {
@@ -11,7 +9,7 @@ function App() {
     "Content-Type": "application/json",
   };
 
-  function fetchData (){
+  function fetchData() {
     fetch(
       "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
       {
@@ -32,11 +30,11 @@ function App() {
   useEffect(() => {
     fetchData();
     const interval = setInterval(() => {
-      fetchData()
+      fetchData();
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  });
 
   return (
     <div className="App">
