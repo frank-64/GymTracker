@@ -28,8 +28,7 @@ namespace GymTracker.Functions
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             var occupancy = await _trackingService.GetCurrentOccupancy();
-            string responseMessage = $"The current occupancy at the gym is {occupancy}.";
-            return new OkObjectResult(responseMessage);
+            return new OkObjectResult(occupancy);
         }
 
         [FunctionName("InfluxOccurrence")]
