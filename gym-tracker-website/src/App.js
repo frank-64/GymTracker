@@ -2,46 +2,50 @@ import "./App.css";
 import ReactSpeedometer from "react-d3-speedometer";
 import { useState, useEffect } from "react";
 
+
+
 function App() {
-  const [error, setError] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [occupancyLevel, setOccupancy] = useState(0);
   var headers = {
     Accept: "application/json",
     "Content-Type": "application/json",
   };
 
+  function fetchData (){
+    fetch(
+      "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
+      {
+        mode: "cors",
+        method: "GET",
+        headers: headers,
+      }
+    ).then((response) => {
+      if (response.ok) {
+        response.json().then((json) => {
+          var occupancyObject = JSON.parse(json);
+          setOccupancy(occupancyObject.Value);
+        });
+      }
+    });
+  }
+
   useEffect(() => {
-    async function fetchData() {
-      fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
-        {
-          mode: "cors",
-          method: "GET",
-          headers: headers
-        }
-      ).then((response) => {
-        if (response.ok) {
-          response.json().then((json) => {
-            var occupancyObject = JSON.parse(json)
-            setOccupancy(occupancyObject.Value);
-          });
-        }
-      });
-    }
     fetchData();
+    const interval = setInterval(() => {
+      fetchData()
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="App">
       <script crossorigin src="..."></script>
-      {console.log(occupancyLevel)}
       <header className="App-header">
         <h1 className="title">Gym Tracker Application</h1>
         <p>This gym is currently:</p>
         <div className="busyMeter">
           <ReactSpeedometer
-            forceRender={true}
             segments={5}
             width={800}
             height={700}
