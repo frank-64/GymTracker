@@ -59,7 +59,7 @@ function App() {
             //currentValueText="Happiness Level"
             customSegmentLabels={[
               {
-                text: "Very Quiet",
+                text: "Very Very Quiet",
                 position: "OUTSIDE",
                 color: "#ffffff",
               },
