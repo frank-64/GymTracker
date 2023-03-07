@@ -23,8 +23,10 @@ namespace GymTracker.Domain.Services
             _azureRepository = azureRepository;
             _cosmosRepository = cosmosRepository;
         }
-        public async Task<int> GetCurrentOccupancy()
+        public async Task<Occupancy> GetCurrentOccupancy()
         {
+            //TODO: Store max gym occupancy in gym settings db
+            var maxOccupancy = 80;
             await _cosmosRepository.CreateDatabaseAsync();
             await _cosmosRepository.CreateContainerAsync();
             DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -34,11 +36,12 @@ namespace GymTracker.Domain.Services
             if (gymDayTracker == null)
             {
                 Console.WriteLine("Do something as missing tracker file");
-                return 0;
+                return new Occupancy();
             }
             else
             {
-                return gymDayTracker.Resource.CurrentGymOccupancy;
+                Occupancy occupancy = new Occupancy(gymDayTracker.Resource.CurrentGymOccupancy, maxOccupancy);
+                return occupancy;
             }
         }
 

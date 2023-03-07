@@ -9,6 +9,18 @@ namespace GymTracker.Domain.Entities
     public class Occupancy
     {
         public int Value { get; set; }
-        public int Percentage => Value / 100;
+        public int Percentage {get; set; }
+        public int MaxOccupany { get; set; }
+
+        public Occupancy()
+        {
+
+        }
+        public Occupancy(int value, int maxOccupancy)
+        {
+            this.Value = value;
+            this.MaxOccupany = maxOccupancy;
+            this.Percentage = value / MaxOccupany;
+        }
     }
 }

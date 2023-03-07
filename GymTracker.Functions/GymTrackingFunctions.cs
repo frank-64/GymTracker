@@ -29,7 +29,7 @@ namespace GymTracker.Functions
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             var occupancy = await _trackingService.GetCurrentOccupancy();
-            var jsonOccupancy = JsonConvert.SerializeObject(new Occupancy { Value = occupancy });
+            var jsonOccupancy = JsonConvert.SerializeObject(occupancy);
             return new OkObjectResult(jsonOccupancy);
         }
 
@@ -86,8 +86,7 @@ namespace GymTracker.Functions
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            log.LogInformation(requestBody);
-            log.LogInformation($"Event occurred: {data}");
+            log.LogInformation($"Event occurred with body: {data}");
 
             return new OkObjectResult(data);
         }
