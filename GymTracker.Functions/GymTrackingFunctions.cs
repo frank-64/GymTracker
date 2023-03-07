@@ -86,6 +86,7 @@ namespace GymTracker.Functions
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
+            log.LogInformation(requestBody);
             log.LogInformation($"Event occurred with body: {data}");
 
             return new OkObjectResult(data);
