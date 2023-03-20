@@ -42,7 +42,7 @@ function App() {
       <script crossorigin src="..."></script>
       <header className="App-header">
         <h1 className="title">Gym Tracker Application</h1>
-        <p>This gym is currently:</p>
+        <p>The gym is currently:</p>
         <div className="busyMeter">
           <ReactSpeedometer
             segments={5}
