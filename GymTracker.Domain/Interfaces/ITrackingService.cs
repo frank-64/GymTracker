@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GymTracker.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,6 @@ namespace GymTracker.Domain.Interfaces
         public Task ManageInflux(int amount);
         public Task ManageOutflow(int amount);
         public Task<int> GetTotalCapacity();
-        public Task<int> GetCurrentOccupancy();
+        public Task<Occupancy> GetCurrentOccupancy();
     }
 }
