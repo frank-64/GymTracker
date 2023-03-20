@@ -21,6 +21,7 @@ function App() {
       if (response.ok) {
         response.json().then((json) => {
           var occupancyObject = JSON.parse(json);
+          console.log(occupancyObject);
           setOccupancy(occupancyObject.Value);
         });
       }
