@@ -50,7 +50,7 @@ namespace GymTracker.Functions
 
             string responseMessage = string.IsNullOrEmpty(influxAmount)
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"An influx of {influxAmount} person(s) entering the gym was recorded successfully.";
+                : $"An influx of {influxAmount} person(s) entering the gym was recorded successfully..";
 
             return new OkObjectResult(responseMessage);
         }
