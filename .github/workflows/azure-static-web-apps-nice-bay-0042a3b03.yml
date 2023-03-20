@@ -7,7 +7,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - develop
+      - master
 
 env: 
  NPM_CONFIG_LEGACY_PEER_DEPS: true
