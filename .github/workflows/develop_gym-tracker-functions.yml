@@ -6,7 +6,7 @@ name: Build and deploy dotnet core app to Azure Function App - gym-tracker-funct
 on:
   push:
     branches:
-      - develop
+      - master
   workflow_dispatch:
 
 env:
