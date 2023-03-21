@@ -11,7 +11,6 @@ namespace GymTracker.Domain.Interfaces
     {
         public Task ManageInflux(int amount);
         public Task ManageOutflow(int amount);
-        public Task<int> GetTotalCapacity();
         public Task<Occupancy> GetCurrentOccupancy();
     }
 }
