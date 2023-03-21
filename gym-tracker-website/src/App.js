@@ -22,7 +22,7 @@ function App() {
         response.json().then((json) => {
           var occupancyObject = JSON.parse(json);
           console.log(occupancyObject);
-          setOccupancy(occupancyObject.Value);
+          setOccupancy(occupancyObject.Percentage);
         });
       }
     });
