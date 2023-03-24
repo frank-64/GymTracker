@@ -18,15 +18,16 @@ namespace GymTracker.Domain.Services
         private readonly IAzureRepository _azureRepository;
         private readonly ICosmosRepository _cosmosRepository;
         private readonly string trackingFilename = "gymCounter.json";
+        private readonly int _maximumOccupancy;
         public TrackingService(IAzureRepository azureRepository, ICosmosRepository cosmosRepository)
         {
             _azureRepository = azureRepository;
             _cosmosRepository = cosmosRepository;
+            _maximumOccupancy = int.Parse(Environment.GetEnvironmentVariable("maxGymOccupancy"));
         }
         public async Task<Occupancy> GetCurrentOccupancy()
         {
             //TODO: Store max gym occupancy in gym settings db
-            var maxOccupancy = 80;
             await _cosmosRepository.CreateDatabaseAsync();
             await _cosmosRepository.CreateContainerAsync();
             DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -40,14 +41,9 @@ namespace GymTracker.Domain.Services
             }
             else
             {
-                Occupancy occupancy = new Occupancy(gymDayTracker.Resource.CurrentGymOccupancy, maxOccupancy);
+                Occupancy occupancy = new Occupancy(gymDayTracker.Resource.CurrentGymOccupancy, _maximumOccupancy);
                 return occupancy;
             }
-        }
-
-        public async Task<int> GetTotalCapacity()
-        {
-            throw new NotImplementedException();
         }
 
         public async void IncrementCountAsync(ItemResponse<GymDayTracker> itemResponse, int amount)
@@ -55,13 +51,21 @@ namespace GymTracker.Domain.Services
             GymDayTracker gymDayTracker = itemResponse.Resource;
 
             gymDayTracker.CurrentGymOccupancy += amount;
-            if (gymDayTracker.CurrentGymOccupancy > gymDayTracker.HighestGymOccupancy)
-            {
-                gymDayTracker.HighestGymOccupancy = gymDayTracker.CurrentGymOccupancy;
-            }
-            gymDayTracker.LastModified = DateTimeOffset.UtcNow;
 
-            await _cosmosRepository.UpsertItemAsync(gymDayTracker);
+            if (!(gymDayTracker.CurrentGymOccupancy >= _maximumOccupancy))
+            {
+                // Set highest occupancy if more than current highest occupancy
+                if (gymDayTracker.CurrentGymOccupancy > gymDayTracker.HighestGymOccupancy)
+                {
+                    gymDayTracker.HighestGymOccupancy = gymDayTracker.CurrentGymOccupancy;
+                }
+
+                // Update last modified time of item
+                gymDayTracker.LastModified = DateTimeOffset.UtcNow;
+
+                //Update item
+                await _cosmosRepository.UpsertItemAsync(gymDayTracker);
+            }
         }
 
         public async void DecrementCountAsync(ItemResponse<GymDayTracker> itemResponse, int amount)
