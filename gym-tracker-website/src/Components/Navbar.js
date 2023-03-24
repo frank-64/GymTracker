@@ -16,9 +16,7 @@ function Navbar(props) {
   const [time, setTime] = useState(
     new Date().toLocaleTimeString("en-GB", timeOptions)
   );
-  const [date, setDate] = useState(
-    new Date().toLocaleDateString("en-GB", dateOptions)
-  );
+  const date = new Date().toLocaleDateString("en-GB", dateOptions);
 
   // Update the time every 1000ms
   setInterval(
