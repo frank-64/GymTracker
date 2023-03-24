@@ -41,38 +41,53 @@ function Dashboard() {
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-
-  function fetchData() {
-    fetch(
-      "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
-      {
-        mode: "cors",
-        method: "GET",
-        headers: headers,
-      }
-    ).then((response) => {
-      if (response.ok) {
-        response.json().then((json) => {
-          var occupancyObject = JSON.parse(json);
-          console.log(occupancyObject);
-          setOccupancy(occupancyObject.Percentage);
-          setGymOccupancyConfiguration(
-            getColorAndText(occupancyObject.Percentage)
-          );
-        });
-      }
-    });
-  }
+  
 
   useEffect(() => {
-    fetchData();
-    determineGymStatus();
-    const interval = setInterval(() => {
-      fetchData();
-    }, 30000);
+    function fetchGymDetails() {
+      fetch(
+        "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?",
+        {
+          mode: "cors",
+          method: "GET",
+          headers: headers,
+        }
+      ).then((response) => {
+        if (response.ok) {
+          response.json().then((json) => {
+            var gymDetailsObject = JSON.parse(json);
+            console.log(gymDetailsObject);
+            setGymName(gymDetailsObject.gymName);
+          });
+        }
+      });
+    }
 
-    return () => clearInterval(interval);
-  });
+    function fetchGymOccupancy() {
+      fetch(
+        "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
+        {
+          mode: "cors",
+          method: "GET",
+          headers: headers,
+        }
+      ).then((response) => {
+        if (response.ok) {
+          response.json().then((json) => {
+            var occupancyObject = JSON.parse(json);
+            console.log(occupancyObject);
+            setOccupancy(occupancyObject.Percentage);
+            setGymOccupancyConfiguration(
+              getColorAndText(occupancyObject.Percentage)
+            );
+          });
+        }
+      });
+    }
+
+    fetchGymOccupancy();
+    fetchGymDetails();
+  }, []);
 
   return (
     <div className="dashboard">
