@@ -23,6 +23,7 @@ jobs:
           node-version: "16.x"
 
       - name: Install Packages
+        working-directory: ./gym-tracker-website
         run: npm install
 
       - name: Build
