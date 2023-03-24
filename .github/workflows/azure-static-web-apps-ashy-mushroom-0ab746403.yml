@@ -8,6 +8,9 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - feature/frontend-dashboard
+      
+env: 
+ NPM_CONFIG_LEGACY_PEER_DEPS: true
 
 jobs:
   build_and_deploy_job:
