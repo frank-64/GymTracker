@@ -15,13 +15,10 @@ namespace GymTracker.Domain.Services
 {
     public class TrackingService : ITrackingService
     {
-        private readonly IAzureRepository _azureRepository;
         private readonly ICosmosRepository _cosmosRepository;
-        private readonly string trackingFilename = "gymCounter.json";
         private readonly int _maximumOccupancy;
-        public TrackingService(IAzureRepository azureRepository, ICosmosRepository cosmosRepository)
+        public TrackingService(ICosmosRepository cosmosRepository)
         {
-            _azureRepository = azureRepository;
             _cosmosRepository = cosmosRepository;
             _maximumOccupancy = int.Parse(Environment.GetEnvironmentVariable("maxGymOccupancy"));
         }

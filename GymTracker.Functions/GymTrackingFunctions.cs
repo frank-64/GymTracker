@@ -15,11 +15,26 @@ namespace GymTracker.Functions
     public class GymTrackingFunctions
     {
         private readonly ITrackingService _trackingService;
+        private readonly IGymDetailsService _gymDetailsService;
 
-        public GymTrackingFunctions(ITrackingService trackingService)
+        public GymTrackingFunctions(ITrackingService trackingService, IGymDetailsService gymDetailsService)
         {
             _trackingService = trackingService;
+            _gymDetailsService = gymDetailsService;
         }
+
+        [FunctionName("GetGymDetails")]
+        public async Task<IActionResult> GetGymDetails(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getGymDetails")] HttpRequest req,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var gymDetails = await _gymDetailsService.GetGymDetails();
+            var jsonGymDetails = JsonConvert.SerializeObject(gymDetails);
+            return new OkObjectResult(jsonGymDetails);
+        }
+
 
         [FunctionName("DetermineGymOccupancy")]
         public async Task<IActionResult> DetermineGymOccupancy(
@@ -79,8 +94,8 @@ namespace GymTracker.Functions
 
         [FunctionName("OccupancyEvent")]
         public async Task<IActionResult> OccupancyEvent(
-    [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "occupancyEvent")] HttpRequest req,
-    ILogger log)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "occupancyEvent")] HttpRequest req,
+        ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
