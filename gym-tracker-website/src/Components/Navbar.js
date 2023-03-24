@@ -2,18 +2,28 @@ import React, { useState } from "react";
 import "./Navbar.css";
 
 function Navbar(props) {
-  const options = {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
+  const dateOptions = {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   };
 
-  const [time, setTime] = useState(new Date().toLocaleTimeString());
-  const [date, setDate] = useState(new Date().toLocaleDateString('en-GB', options));
+  const timeOptions = { timeZoneName: "short" };
+
+  // Initially setting the date and time used in the Navbar
+  const [time, setTime] = useState(
+    new Date().toLocaleTimeString("en-GB", timeOptions)
+  );
+  const [date, setDate] = useState(
+    new Date().toLocaleDateString("en-GB", dateOptions)
+  );
 
   // Update the date and time
-  setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
+  setInterval(
+    () => setTime(new Date().toLocaleTimeString("en-GB", timeOptions)),
+    1000
+  );
 
   return (
     <div className="navbar">
