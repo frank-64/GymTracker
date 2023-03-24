@@ -6,10 +6,10 @@ namespace GymTracker.Repository
     public class AzureRepository : IAzureRepository
     {
         private readonly string connectionString;
-        private readonly string containerName = "tracking";
+        private readonly string containerName = "gym-details";
         public AzureRepository()
         {
-            connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+            connectionString = Environment.GetEnvironmentVariable("GymDetailsBlobConnStr");
         }
 
         public async Task UploadBlobAsync(Stream stream, string blobName)
