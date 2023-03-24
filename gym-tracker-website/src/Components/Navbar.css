@@ -11,14 +11,25 @@
 .navbar-left {
   flex: 1;
   text-align: left;
+  padding-top: 20px;
 }
 
 .navbar-center {
   flex: 2;
   text-align: center;
+  padding-top: 20px;
 }
 
 .navbar-right {
   flex: 1;
   text-align: right;
+  padding-top: 20px;
+}
+
+h1 {
+  font-size: 40px;
+}
+
+span{
+  font-size: 20px;
 }

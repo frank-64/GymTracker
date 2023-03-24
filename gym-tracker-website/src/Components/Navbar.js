@@ -2,9 +2,17 @@ import React, { useState } from "react";
 import "./Navbar.css";
 
 function Navbar(props) {
-  const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const options = {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  };
 
-  // Update the time every second
+  const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const [date, setDate] = useState(new Date().toLocaleDateString('en-GB', options));
+
+  // Update the date and time
   setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
 
   return (
@@ -21,7 +29,12 @@ function Navbar(props) {
       <div className="navbar-center">
         <h1>{props.title}</h1>
       </div>
-      <div className="navbar-right">{time}</div>
+      <div className="navbar-right">
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span>{date}</span>
+          <span>{time}</span>
+        </div>
+      </div>
     </div>
   );
 }
