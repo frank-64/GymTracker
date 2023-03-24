@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Button from "react-bootstrap/Button";
 import "./Navbar.css";
 
 function Navbar(props) {
@@ -19,7 +20,7 @@ function Navbar(props) {
     new Date().toLocaleDateString("en-GB", dateOptions)
   );
 
-  // Update the date and time
+  // Update the time every 1000ms
   setInterval(
     () => setTime(new Date().toLocaleTimeString("en-GB", timeOptions)),
     1000
@@ -28,13 +29,20 @@ function Navbar(props) {
   return (
     <div className="navbar">
       <div className="navbar-left">
-        <button
+        <Button
           onClick={() => {
             window.location.href = props.navigateTarget;
           }}
+          variant="outline-light"
+          style={{
+            borderRadius: "0.5",
+            fontSize: "24px",
+            padding: "12px 24px",
+          }}
         >
+          {props.navigateIcon}
           {props.navigateText}
-        </button>
+        </Button>
       </div>
       <div className="navbar-center">
         <h1>{props.title}</h1>

@@ -1,3 +1,9 @@
+.navbar-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -6,30 +12,38 @@
   background-color: #282c34;
   color: white;
   padding: 0 20px;
+  width: 100%;
 }
 
 .navbar-left {
   flex: 1;
   text-align: left;
   padding-top: 20px;
+  max-width: 30%;
+  padding-left: 30px;
 }
 
 .navbar-center {
   flex: 2;
   text-align: center;
   padding-top: 20px;
+  max-width: 40%;
 }
 
 .navbar-right {
   flex: 1;
   text-align: right;
   padding-top: 20px;
+  max-width: 30%;
+  padding-right: 30px;
 }
 
 h1 {
   font-size: 40px;
+  margin: 0;
 }
 
-span{
+span {
   font-size: 20px;
+  display: block;
 }
