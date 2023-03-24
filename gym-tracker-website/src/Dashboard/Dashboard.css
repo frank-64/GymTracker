@@ -1,0 +1,31 @@
+.dashboard {
+  text-align: center;
+  background-color: #282c34;
+}
+
+.title {
+  margin-bottom: 0px;
+}
+
+.dashboard-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+td:first-child {
+  text-align: left;
+}
+
+p{
+  color: white;
+  font-size: calc(10px + 2vmin);
+}
+
+.subtitle-row{
+  margin-bottom: 0px;
+}
