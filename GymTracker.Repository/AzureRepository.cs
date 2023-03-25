@@ -16,7 +16,7 @@ namespace GymTracker.Repository
         {
             var containerClient = new BlobContainerClient(connectionString, containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
-            await blobClient.UploadAsync(stream);
+            await blobClient.UploadAsync(stream, overwrite: true);
         }
 
         public async Task<bool> CheckIfBlobExists(string blobPath)
