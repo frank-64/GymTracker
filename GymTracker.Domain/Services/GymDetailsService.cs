@@ -29,5 +29,14 @@ namespace GymTracker.Domain.Services
                 }
             }
         }
+
+        public async Task UpdateGymDetails(GymDetails updatedGymDetails)
+        {
+            string json = JsonConvert.SerializeObject(updatedGymDetails);
+            byte[] byteArray = Encoding.UTF8.GetBytes(json);
+            MemoryStream stream = new MemoryStream(byteArray);
+
+            await _azureRepository.UploadBlobAsync(stream, blobName);
+        }
     }
 }

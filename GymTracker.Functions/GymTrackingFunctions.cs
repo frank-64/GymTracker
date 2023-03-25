@@ -35,6 +35,20 @@ namespace GymTracker.Functions
             return new OkObjectResult(jsonGymDetails);
         }
 
+        [FunctionName("UpdateGymDetails")]
+        public async Task<IActionResult> UpdateGymDetails(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateGymDetails")] HttpRequest req,
+        ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            GymDetails updatedGymDetails = JsonConvert.DeserializeObject<GymDetails>(requestBody);
+
+            await _gymDetailsService.UpdateGymDetails(updatedGymDetails);
+            return new OkResult();
+        }
+
 
         [FunctionName("DetermineGymOccupancy")]
         public async Task<IActionResult> DetermineGymOccupancy(

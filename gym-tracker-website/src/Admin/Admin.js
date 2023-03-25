@@ -3,14 +3,7 @@ import "./Admin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../Components/Navbar";
-import {
-  Col,
-  Container,
-  Row,
-  Table,
-  Badge,
-  Dropdown,
-} from "react-bootstrap";
+import { Col, Container, Row, Table, Badge, Dropdown } from "react-bootstrap";
 
 function Admin() {
   const [gymDetails, setGymDetails] = useState("");
@@ -18,8 +11,10 @@ function Admin() {
   const handleSelect = (eventKey) => {
     const updatedGymDetails = { ...gymDetails };
     if (eventKey === "opened") {
+      updatedGymDetails.AdminClosedGym = false;
       updatedGymDetails.IsOpen = true;
     } else {
+      updatedGymDetails.AdminClosedGym = true;
       updatedGymDetails.IsOpen = false;
     }
     setGymDetails(updatedGymDetails);
@@ -36,20 +31,20 @@ function Admin() {
       mode: "cors",
       method: "POST",
       headers: headers,
-      body: JSON.stringify(gymDetails)
+      body: JSON.stringify(gymDetails),
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log(data);
-    })
-    .catch(error => {
-      console.error("There was a problem with the request:", error);
-    });
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("There was a problem with the request:", error);
+      });
   }
 
   useEffect(() => {
