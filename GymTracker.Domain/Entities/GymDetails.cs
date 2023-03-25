@@ -11,9 +11,10 @@ namespace GymTracker.Domain.Entities
         public string GymName { get; set; }
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
+        public bool? AdminClosedGym { get; set; }
 
         // Looping through each opening hours item
-        public bool IsOpen => Hours.Any(hour =>
+        public bool IsOpen => AdminClosedGym.HasValue && AdminClosedGym.Value == true ? false : Hours.Any(hour =>
         {
             // If the day in the current item's day doesn't match the current day of week return false
             if (hour.DayOfWeek.ToLower() != DateTime.Now.DayOfWeek.ToString().ToLower())
