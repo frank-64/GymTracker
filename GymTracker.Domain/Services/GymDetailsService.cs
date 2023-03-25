@@ -1,9 +1,11 @@
-﻿using GymTracker.Domain.Interfaces;
+﻿using GymTracker.Domain.Entities;
+using GymTracker.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace GymTracker.Domain.Services
 {
@@ -17,13 +19,13 @@ namespace GymTracker.Domain.Services
             _azureRepository = azureRepository;
         }
 
-        public async Task<string> GetGymDetails()
+        public async Task<GymDetails> GetGymDetails()
         {
             using (Stream stream = await _azureRepository.GetBlob(blobName))
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    return await reader.ReadToEndAsync();
+                    return JsonConvert.DeserializeObject<GymDetails>(await reader.ReadToEndAsync());
                 }
             }
         }
