@@ -11,27 +11,17 @@ function Dashboard() {
   const [occupancyLevel, setOccupancy] = useState(0);
   const [gymDetails, setGymDetails] = useState('');
   const [gymStatus, setGymStatus] = useState(true);
-  const [gymStatusText, setGymStatusText] = useState("OPEN");
   const [gymOccupancyConfiguration, setGymOccupancyConfiguration] = useState({
     color: "",
     text: "",
   });
 
+  var headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+
   useEffect(() => {
-    function determineGymStatus() {
-      //TODO: Make call to backend to determine gym details
-  
-      if (!gymStatus) {
-        setGymStatusText("CLOSED");
-        // TODO: Move this VV
-        // setGymStatus(false);
-      }
-    }
-  
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
 
     function fetchGymDetails() {
       fetch(
@@ -46,7 +36,7 @@ function Dashboard() {
           response.json().then((json) => {
             var gymDetailsObject = JSON.parse(json);
             setGymDetails(gymDetailsObject);
-            determineGymStatus(gymDetailsObject.Hours);
+            setGymStatus(gymDetailsObject.IsOpen);
           });
         }
       });
@@ -76,7 +66,6 @@ function Dashboard() {
 
     fetchGymOccupancy();
     fetchGymDetails();
-    determineGymStatus();
   }, []);
 
   return (
@@ -87,7 +76,7 @@ function Dashboard() {
         navigateIcon={
           <FontAwesomeIcon icon={faChartLine} style={{ marginRight: "10px" }} />
         }
-        navigateTarget="/insights/"
+        navigateTarget="/insights"
       />
       <Container fluid>
         <Row className="subtitle-row">
@@ -96,7 +85,7 @@ function Dashboard() {
               <p>
                 The Gym is currently:{" "}
                 <Badge bg={gymStatus ? "success" : "danger"}>
-                  {gymStatusText}
+                  {gymStatus ? "OPEN" : "CLOSED"}
                 </Badge>
               </p>
             </div>
@@ -107,7 +96,8 @@ function Dashboard() {
             <div className="dashboard-section">
               <div>
                 <p>
-                  Opening hours for <Badge>{gymDetails.GymName ? gymDetails.GymName : ''}</Badge>
+                  Opening hours for{" "}
+                  <Badge>{gymDetails.GymName ? gymDetails.GymName : ""}</Badge>
                 </p>
               </div>
               <div>
@@ -120,13 +110,13 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                  {gymDetails.Hours?.map((day) => (
-                    <tr key={day.DayOfWeek}>
-                      <td>{day.DayOfWeek}</td>
-                      <td>{day.StartTime}</td>
-                      <td>{day.EndTime}</td>
-                    </tr>
-                  ))}
+                    {gymDetails.Hours?.map((day) => (
+                      <tr key={day.DayOfWeek}>
+                        <td>{day.DayOfWeek}</td>
+                        <td>{day.StartTime}</td>
+                        <td>{day.EndTime}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </Table>
               </div>
@@ -184,7 +174,7 @@ function Dashboard() {
                       style={{
                         color: gymOccupancyConfiguration.color,
                         display: "inline",
-                        fontSize: "100%"
+                        fontSize: "100%",
                       }}
                     >
                       {" "}
