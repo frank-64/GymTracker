@@ -9,7 +9,7 @@ import Navbar from "../Components/Navbar";
 
 function Dashboard() {
   const [occupancyLevel, setOccupancy] = useState(0);
-  const [gymName, setGymName] = useState("ML Sport and Fitness Ltd");
+  const [gymDetails, setGymDetails] = useState('');
   const [gymStatus, setGymStatus] = useState(true);
   const [gymStatusText, setGymStatusText] = useState("OPEN");
   const [gymOccupancyConfiguration, setGymOccupancyConfiguration] = useState({
@@ -17,33 +17,22 @@ function Dashboard() {
     text: "",
   });
 
-  const gymInfo = [
-    { day: "Monday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Tuesday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Wednesday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Thursday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Friday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Saturday", startTime: "10:00 AM", endTime: "6:00 PM" },
-    { day: "Sunday", startTime: "10:00 AM", endTime: "4:00 PM" },
-  ];
-
-  function determineGymStatus() {
-    //Make call to backend to determine gym details
-
-    if (!gymStatus) {
-      setGymStatusText("CLOSED");
-      setGymStatus(false);
-      setGymName("ML Sport and Fitness");
-    }
-  }
-
-  var headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-  };
-  
-
   useEffect(() => {
+    function determineGymStatus() {
+      //TODO: Make call to backend to determine gym details
+  
+      if (!gymStatus) {
+        setGymStatusText("CLOSED");
+        // TODO: Move this VV
+        // setGymStatus(false);
+      }
+    }
+  
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
     function fetchGymDetails() {
       fetch(
         "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?",
@@ -56,8 +45,8 @@ function Dashboard() {
         if (response.ok) {
           response.json().then((json) => {
             var gymDetailsObject = JSON.parse(json);
-            console.log(gymDetailsObject);
-            setGymName(gymDetailsObject.gymName);
+            setGymDetails(gymDetailsObject);
+            determineGymStatus(gymDetailsObject.Hours);
           });
         }
       });
@@ -87,6 +76,7 @@ function Dashboard() {
 
     fetchGymOccupancy();
     fetchGymDetails();
+    determineGymStatus();
   }, []);
 
   return (
@@ -117,7 +107,7 @@ function Dashboard() {
             <div className="dashboard-section">
               <div>
                 <p>
-                  Opening hours for <Badge>{gymName}</Badge>
+                  Opening hours for <Badge>{gymDetails.GymName ? gymDetails.GymName : ''}</Badge>
                 </p>
               </div>
               <div>
@@ -130,13 +120,13 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {gymInfo.map((day) => (
-                      <tr key={day.day}>
-                        <td>{day.day}</td>
-                        <td>{day.startTime}</td>
-                        <td>{day.endTime}</td>
-                      </tr>
-                    ))}
+                  {gymDetails.Hours?.map((day) => (
+                    <tr key={day.DayOfWeek}>
+                      <td>{day.DayOfWeek}</td>
+                      <td>{day.StartTime}</td>
+                      <td>{day.EndTime}</td>
+                    </tr>
+                  ))}
                   </tbody>
                 </Table>
               </div>
@@ -190,15 +180,16 @@ function Dashboard() {
                   />
                   <p>
                     Gym occupancy status is{" "}
-                    <p
+                    <span
                       style={{
                         color: gymOccupancyConfiguration.color,
                         display: "inline",
+                        fontSize: "100%"
                       }}
                     >
                       {" "}
                       {gymOccupancyConfiguration.text}{" "}
-                    </p>
+                    </span>
                     <br />
                     <em>{`${occupancyLevel}% capacity`}</em>
                   </p>
