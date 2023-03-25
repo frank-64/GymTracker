@@ -3,10 +3,11 @@ import "./Admin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../Components/Navbar";
-import { Col, Container, Row, Table, Badge, Dropdown } from "react-bootstrap";
+import { Col, Container, Row, Table, Badge, Dropdown, Button } from "react-bootstrap";
 
 function Admin() {
   const [gymDetails, setGymDetails] = useState("");
+  const [showCustomPanel, setShowCustomPanel] = useState(false);
 
   const handleSelect = (eventKey) => {
     const updatedGymDetails = { ...gymDetails };
@@ -19,6 +20,10 @@ function Admin() {
     }
     setGymDetails(updatedGymDetails);
     postGymDetails(updatedGymDetails);
+  };
+
+  const togglePanel = () => {
+    setShowCustomPanel(!showCustomPanel);
   };
 
   var headers = {
@@ -121,9 +126,14 @@ function Admin() {
                   </tbody>
                 </Table>
               </div>
-              <div>
-                <Dropdown onSelect={handleSelect}>
-                  <Dropdown.Toggle variant="light" id="dropdown-basic">
+              <div className="right-panel-toggle">
+                <Button onClick={togglePanel} variant="outline-light">{showCustomPanel ? 'Update Standard Opening Hours' : 'Add Custom Opening Hour'}</Button>
+              </div>
+              <br/>
+              <div className="gymstatus-dropdown">
+              <p style={{ display: "inline-block", marginRight: "10px" }}>Set gym opening status:</p>
+                <Dropdown onSelect={handleSelect} style={{ display: "inline-block" }}>
+                  <Dropdown.Toggle variant={gymDetails.IsOpen ? "success" : "danger"} id="dropdown-basic">
                     {gymDetails.IsOpen ? "Open" : "Closed"}
                   </Dropdown.Toggle>
 
@@ -137,10 +147,18 @@ function Admin() {
           </Col>
           <Col md={6} className="admin-column-right">
             <div className="admin-section">
-              {true ? (
-                <div className="custom-opening-hour"></div>
+              {showCustomPanel ? (
+                <div className="custom-opening-hour">
+                  <p>
+                    Add Custom Opening Hours
+                  </p>
+                </div>
               ) : (
-                <div className="standard-opening-hours"></div>
+                <div className="standard-opening-hours">
+                  <p>
+                    Update Standard Opening Hours
+                  </p>
+                </div>
               )}
             </div>
           </Col>
