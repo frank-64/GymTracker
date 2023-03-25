@@ -9,6 +9,6 @@ namespace GymTracker.Domain.Interfaces
 {
     public interface IGymDetailsService
     {
-        public Task<string> GetGymDetails();
+        public Task<GymDetails> GetGymDetails();
     }
 }
