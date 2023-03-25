@@ -18,7 +18,7 @@ function Admin() {
       updatedGymDetails.IsOpen = false;
     }
     setGymDetails(updatedGymDetails);
-    postGymDetails();
+    postGymDetails(updatedGymDetails);
   };
 
   var headers = {
@@ -26,12 +26,12 @@ function Admin() {
     "Content-Type": "application/json",
   };
 
-  function postGymDetails() {
-    fetch("https://example.com/api/gym-details", {
+  function postGymDetails(updatedGymDetails) {
+    fetch("https://gym-tracker-functions.azurewebsites.net/api/updateGymDetails?", {
       mode: "cors",
       method: "POST",
       headers: headers,
-      body: JSON.stringify(gymDetails),
+      body: JSON.stringify(updatedGymDetails),
     })
       .then((response) => {
         if (!response.ok) {
