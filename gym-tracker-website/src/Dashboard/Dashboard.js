@@ -10,7 +10,7 @@ import Navbar from "../Components/Navbar";
 function Dashboard() {
   const [occupancyLevel, setOccupancy] = useState(0);
   const [gymDetails, setGymDetails] = useState('');
-  const [gymStatus, setGymStatus] = useState(true);
+
   const [gymOccupancyConfiguration, setGymOccupancyConfiguration] = useState({
     color: "",
     text: "",
@@ -36,7 +36,6 @@ function Dashboard() {
           response.json().then((json) => {
             var gymDetailsObject = JSON.parse(json);
             setGymDetails(gymDetailsObject);
-            setGymStatus(gymDetailsObject.IsOpen);
           });
         }
       });
@@ -84,8 +83,8 @@ function Dashboard() {
             <div className="subtitle">
               <p>
                 The Gym is currently:{" "}
-                <Badge bg={gymStatus ? "success" : "danger"}>
-                  {gymStatus ? "OPEN" : "CLOSED"}
+                <Badge bg={gymDetails.IsOpen ? "success" : "danger"}>
+                  {gymDetails.IsOpen ? "OPEN" : "CLOSED"}
                 </Badge>
               </p>
             </div>
@@ -124,7 +123,7 @@ function Dashboard() {
           </Col>
           <Col md={6} className="dashboard-column-right">
             <div className="dashboard-section">
-              {gymStatus ? (
+              {gymDetails.IsOpen ? (
                 <div>
                   <ReactSpeedometer
                     segments={5}
