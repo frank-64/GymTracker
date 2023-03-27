@@ -1,10 +1,9 @@
-.admin {
-  text-align: center;
-  background-color: #282c34;
-}
-
 .title {
   margin-bottom: 0px;
+}
+
+.admin {
+  background-color: #282c34;
 }
 
 .admin-section {
@@ -30,6 +29,24 @@ p {
   margin-bottom: 0px;
 }
 
+.subtitle {
+  text-align: center;
+}
+
+.add-custom-hours-button {
+  text-align: center;
+}
+
 .footer {
   position: fixed;
+}
+
+.custom-opening-hour label {
+  font-size: large;
+  text-align: left !important;
+}
+
+input:disabled {
+  opacity: 1;
+  cursor: not-allowed;
 }

@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import "./Admin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../Components/Navbar";
-import { addAlert } from "../Helper/helper";
 import {
   Col,
   Container,
@@ -13,13 +12,19 @@ import {
   Dropdown,
   Button,
   Alert,
+  Form,
 } from "react-bootstrap";
 
 function Admin() {
   const [gymDetails, setGymDetails] = useState("");
   const [tempGymDetails, setTempGymDetails] = useState("");
+  const [isGymOpenInput, setIsGymClosedInput] = useState(false);
   const [updatingOpeningHours, setUpdatingOpeningHours] = useState(false);
   const [alerts, setAlerts] = useState([]);
+
+  const handleCheckboxChange = (event) => {
+    setIsGymClosedInput(event.target.checked);
+  };
 
   const handleSelect = (eventKey) => {
     const updatedGymDetails = { ...gymDetails };
@@ -45,7 +50,7 @@ function Admin() {
     } else {
       postGymDetails(tempGymDetails);
       setGymDetails(tempGymDetails);
-      setTempGymDetails("");
+      setTempGymDetails(gymDetails);
     }
   }
 
@@ -68,6 +73,14 @@ function Admin() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    const timeRegex = /^(0?[1-9]|1[0-2]):([0-5][0-9])\s?(AM|PM)$/i;
+    if(!timeRegex.test(value)){
+      alert("The input did not match the expected pattern e.g. 9:30 PM");
+      e.target.value = "";
+      return;
+    }
+
     const splitName = name.split("-");
     const isStartTime = splitName[0] === "StartTime" ? true : false;
     const updatedGymDetails = { ...gymDetails };
@@ -192,19 +205,19 @@ function Admin() {
                           <td>
                             <input
                               type="text"
-                              class="form-control"
+                              className="form-control"
                               name={`StartTime-${day.DayOfWeek}`}
                               placeholder={day.StartTime}
-                              onChange={handleInputChange}
+                              onBlur={handleInputChange}
                             />
                           </td>
                           <td>
                             <input
                               type="text"
-                              class="form-control"
+                              className="form-control"
                               name={`EndTime-${day.DayOfWeek}`}
                               placeholder={day.EndTime}
-                              onChange={handleInputChange}
+                              onBlur={handleInputChange}
                             />
                           </td>
                         </tr>
@@ -272,7 +285,50 @@ function Admin() {
           <Col md={6} className="admin-column-right">
             <div className="admin-section">
               <div className="custom-opening-hour">
-                <p>Add Custom Opening Hours</p>
+                <div>
+                  <p>Add Closure or Set Specific Opening Hours</p>
+                </div>
+                <div>
+                  <Form>
+                    <Form.Group style={{ marginBottom: "20px" }}>
+                      <Form.Label>Date:</Form.Label>
+                      <Form.Control type="date" style={{ width: "50%" }} />
+                    </Form.Group>
+                    <Form.Group
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Form.Label style={{ marginRight: "10px" }}>
+                        Will the gym be open?:
+                      </Form.Label>
+                      <Form.Check
+                        inline
+                        type="checkbox"
+                        checked={isGymOpenInput}
+                        onChange={handleCheckboxChange}
+                      />
+                    </Form.Group>
+                    <Fragment>
+                      <fieldset disabled={!isGymOpenInput}>
+                        <Form.Group style={{ marginBottom: "25px" }}>
+                          <Form.Label>Start Time:</Form.Label>
+                          <Form.Control type="time" style={{ width: "50%" }} />
+                        </Form.Group>
+                        <Form.Group style={{ marginBottom: "25px" }}>
+                          <Form.Label>End Time:</Form.Label>
+                          <Form.Control type="time" style={{ width: "50%" }} />
+                        </Form.Group>
+                      </fieldset>
+                    </Fragment>
+                  </Form>
+                </div>
+                <div>
+                  <Button variant="success">
+                    Add
+                  </Button>
+                </div>
               </div>
             </div>
           </Col>
@@ -280,19 +336,19 @@ function Admin() {
         {/* TODO: Come back to this as errors are hard to see */}
         <Col md={12}>
           <div id="alertContainer" className="alert-container">
-          {alerts.map((alert) => (
-            <Alert
-              key={alert.messageTitle}
-              variant={alert.alertType}
-              dismissible
-              onClose={() => removeAlert(alert.messageTitle)}
-              className="footer"
-            >
-              <strong>{alert.messageTitle}</strong>
-              <span>{alert.message}</span>
-            </Alert>
-          ))}
-        </div>
+            {alerts.map((alert) => (
+              <Alert
+                key={alert.messageTitle}
+                variant={alert.alertType}
+                dismissible
+                onClose={() => removeAlert(alert.messageTitle)}
+                className="footer"
+              >
+                <strong>{alert.messageTitle}</strong>
+                <span>{alert.message}</span>
+              </Alert>
+            ))}
+          </div>
         </Col>
       </Container>
     </div>
