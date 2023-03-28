@@ -10,12 +10,12 @@ namespace GymTracker.Domain.Interfaces
 {
     public interface ICosmosRepository
     {
-        Task CreateDatabaseAsync();
-        Task CreateContainerAsync();
-        Task UpsertItemAsync(GymDayTracker gymDayTracker);
-        Task<ItemResponse<GymDayTracker>> GetItemAsync(string partitionKey, string id);
+        Task CreateDatabaseAsync(string databaseId);
+        Task CreateContainerAsync(string containerId, string partitionKeyFormat);
+        Task UpsertItemAsync<T>(T item);
+        Task<ItemResponse<Item>> GetItemAsync<Item>(string partitionKey, string id);
         Task AddItemsToContainerAsync(GymDayTracker gymDayTracker);
-        Task<ItemResponse<GymDayTracker>> GetItemIfExistAsync(string partitionKey, string id);
-        Task DeleteFamilyItemAsync(string partitionKey, string id);
+        Task<ItemResponse<Item>> GetItemIfExistAsync<Item>(string partitionKey, string id);
+        Task DeleteItemAsync<Item>(string partitionKey, string id);
     }
 }

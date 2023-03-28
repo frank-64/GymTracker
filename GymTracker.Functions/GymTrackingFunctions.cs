@@ -58,7 +58,7 @@ namespace GymTracker.Functions
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             Credentials credentials = JsonConvert.DeserializeObject<Credentials>(requestBody);
 
-            log.LogInformation($"C# HTTP trigger function processed a request for username: {credentials.Username} password:{credentials.Password}.");
+            log.LogInformation($"C# HTTP trigger function processed a request for username {credentials.Username}.");
             bool loginResult = false;
             try
             {
@@ -74,7 +74,7 @@ namespace GymTracker.Functions
             {
                 return new OkResult();
             }
-            log.LogInformation($"The password {credentials.Password} did not match the hashed password stored.");
+            log.LogInformation($"The password did not match the hashed password stored.");
             return new BadRequestObjectResult("The password you provided was not correct.");
         }
 
