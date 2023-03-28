@@ -1,5 +1,5 @@
-import { useState, useEffect, Fragment } from "react";
-import "./AdminLogin.css";
+import { useState, useEffect, Fragment, navigate } from "react";
+import "./Admin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../Components/Navbar";

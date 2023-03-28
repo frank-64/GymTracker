@@ -9,7 +9,11 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using GymTracker.Domain.Interfaces;
 using GymTracker.Domain.Entities;
-using System.Net.Http;
+using System.Security.Claims;
+using System.Linq;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace GymTracker.Functions
 {
@@ -66,13 +70,30 @@ namespace GymTracker.Functions
             }
             catch(Exception e)
             {
-                log.LogError(e.Message, "An error occurred when accessing the KeyVault");
+                log.LogError(e.Message, "An error occurred when accessing the password hash");
                 return new BadRequestObjectResult("Your username was not valid.");
             }
 
             if (loginResult)
             {
-                return new OkResult();
+                ClaimsIdentity identity = req.HttpContext.User.Identity as ClaimsIdentity;
+
+                // Create a list of claims from the user's identity
+                Claim[] claims = identity.Claims.ToArray();
+
+                // Create a JWT token
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("JWTKey"));
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                // Return the token as a response
+                return new OkObjectResult(JsonConvert.SerializeObject(new TokenResponse(tokenHandler.WriteToken(token))));
             }
             log.LogInformation($"The password did not match the hashed password stored.");
             return new BadRequestObjectResult("The password you provided was not correct.");
