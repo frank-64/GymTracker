@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState } from "react";
 import "./AdminLogin.css";
 import "./Admin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,21 +10,15 @@ import {
   Col,
   Container,
   Row,
-  Table,
-  Badge,
-  Dropdown,
   Button,
-  Alert,
   Form,
-  Card,
+  Card
 } from "react-bootstrap";
 
 function AdminLogin() {
   const navigate = useNavigate();
-  var bcrypt = require('bcryptjs');
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [hashedPassword, setHashedPassword] = useState("");
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -38,36 +32,28 @@ function AdminLogin() {
     "Content-Type": "application/json",
   };
 
-  const hashPass = () => {
-    var salt = bcrypt.genSaltSync(10);
-    var hash = bcrypt.hashSync(password, salt)
-    setHashedPassword(hash);
-  }
-
-
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-
-    hashPass();
-    console.log(hashedPassword);
-    // try {
-    //   const response = await fetch("/api/login", {
-    //     mode: "cors",
-    //     method: "POST",
-    //     headers: headers,
-    //     body: JSON.stringify({ username, hashedPassword }),
-    //   });
-    //   if (response.ok) {
-    //     const { token } = await response.json();
-    //     localStorage.setItem("authToken", token);
-    //     navigate("/2fa");
-    //   } else {
-    //     alert("Invalid username or password.");
-    //   }
-    // } catch (err) {
-    //   console.error(err);
-    //   alert("An unexpected error occurred.");
-    // }
+    try {
+      const response = await fetch("https://gym-tracker-functions.azurewebsites.net/api/determineAdminLogin?", {
+        mode: "cors",
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ Username: username, Password: password}),
+      });
+      if (response.ok) {
+        const { token } = await response.json();
+        // localStorage.setItem("authToken", token);
+        // navigate("/2fa");
+        alert("Success!!!");
+      } else {
+        console.log(response)
+        alert("Invalid username or password.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An unexpected error occurred.");
+    }
   };
 
   return (

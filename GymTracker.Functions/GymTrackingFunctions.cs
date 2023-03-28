@@ -55,17 +55,18 @@ namespace GymTracker.Functions
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "determineAdminLogin")] HttpRequest req,
         ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             Credentials credentials = JsonConvert.DeserializeObject<Credentials>(requestBody);
+
+            log.LogInformation($"C# HTTP trigger function processed a request for username: {credentials.Username} password:{credentials.Password}.");
             bool loginResult = false;
             try
             {
                 loginResult = await _gymDetailsService.AdminLogin(credentials);
             }
-            catch(Exception)
+            catch(Exception e)
             {
+                log.LogError(e.Message, "An error occurred when accessing the KeyVault");
                 return new BadRequestObjectResult("Your username was not valid.");
             }
 
@@ -73,6 +74,7 @@ namespace GymTracker.Functions
             {
                 return new OkResult();
             }
+            log.LogInformation($"The password {credentials.Password} did not match the hashed password stored.");
             return new BadRequestObjectResult("The password you provided was not correct.");
         }
 
