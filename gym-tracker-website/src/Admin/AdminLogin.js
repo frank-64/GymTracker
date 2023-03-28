@@ -97,8 +97,8 @@ function AdminLogin() {
                       <Form.Control
                         type="text"
                         placeholder="Enter username"
-                        value={email}
-                        onChange={handleEmailChange}
+                        value={username}
+                        onChange={handleUsernameChange}
                         required
                       />
                     </Form.Group>
