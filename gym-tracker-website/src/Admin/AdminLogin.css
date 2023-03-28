@@ -38,3 +38,7 @@
   .login-card{
     width: 400px;
   }
+
+  .alert{
+    font-size: small !important;
+  }
