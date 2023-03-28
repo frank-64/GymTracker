@@ -11,5 +11,6 @@ namespace GymTracker.Domain.Interfaces
     {
         public Task<GymDetails> GetGymDetails();
         public Task UpdateGymDetails(GymDetails updatedGymDetails);
+        public Task<bool> AdminLogin(Credentials credentials);
     }
 }

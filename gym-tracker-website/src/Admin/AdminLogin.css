@@ -1,0 +1,40 @@
+.admin-login {
+    background-color: #282c34;
+  }
+  
+  .admin-login-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: calc(10px + 2vmin);
+    color: rgb(2, 2, 2);
+  }
+
+  .admin-login-container{
+    margin-top: 150px;
+  }
+
+  .admin-login-section label {
+    font-size: large;
+    font-weight: 400;
+    text-align: left !important;
+  }
+
+  .form-button{
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .card-title{
+    padding-top: 10px;
+    text-align: center;
+  }
+
+  .h5{
+    font-size: 1.5rem !important;
+  }
+
+  .login-card{
+    width: 400px;
+  }
