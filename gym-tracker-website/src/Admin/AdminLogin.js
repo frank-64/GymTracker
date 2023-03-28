@@ -44,8 +44,6 @@ function AdminLogin() {
     setHashedPassword(hash);
   }
 
-  // Compare hashed and unhashed
-  //bcrypt.compareSync(password, hashedPassword)
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +55,7 @@ function AdminLogin() {
     //     mode: "cors",
     //     method: "POST",
     //     headers: headers,
-    //     body: JSON.stringify({ email, hashedPassword }),
+    //     body: JSON.stringify({ username, hashedPassword }),
     //   });
     //   if (response.ok) {
     //     const { token } = await response.json();

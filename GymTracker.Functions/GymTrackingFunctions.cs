@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using GymTracker.Domain.Interfaces;
 using GymTracker.Domain.Entities;
+using System.Net.Http;
 
 namespace GymTracker.Functions
 {
@@ -47,6 +48,32 @@ namespace GymTracker.Functions
 
             await _gymDetailsService.UpdateGymDetails(updatedGymDetails);
             return new OkResult();
+        }
+
+        [FunctionName("AdminLogin")]
+        public async Task<IActionResult> AdminLogin(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "determineAdminLogin")] HttpRequest req,
+        ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            Credentials credentials = JsonConvert.DeserializeObject<Credentials>(requestBody);
+            bool loginResult = false;
+            try
+            {
+                loginResult = await _gymDetailsService.AdminLogin(credentials);
+            }
+            catch(Exception)
+            {
+                return new BadRequestObjectResult("Your username was not valid.");
+            }
+
+            if (loginResult)
+            {
+                return new OkResult();
+            }
+            return new BadRequestObjectResult("The password you provided was not correct.");
         }
 
 
