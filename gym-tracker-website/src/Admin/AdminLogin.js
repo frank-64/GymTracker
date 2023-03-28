@@ -22,12 +22,12 @@ import {
 function AdminLogin() {
   const navigate = useNavigate();
   var bcrypt = require('bcryptjs');
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [hashedPassword, setHashedPassword] = useState("");
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
+  const handleUsernameChange = (e) => {
+    setUsername(e.target.value);
   };
 
   const handlePasswordChange = (e) => {
@@ -50,13 +50,8 @@ function AdminLogin() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      alert('Please enter a valid email address');
-      return;
-    }
-
     hashPass();
+    console.log(hashedPassword);
     // try {
     //   const response = await fetch("/api/login", {
     //     mode: "cors",
@@ -97,11 +92,11 @@ function AdminLogin() {
                 </Card.Title>
                 <Card.Body>
                   <Form onSubmit={handleFormSubmit}>
-                    <Form.Group controlId="form-email">
-                      <Form.Label>Email address</Form.Label>
+                    <Form.Group controlId="form-username">
+                      <Form.Label>Username</Form.Label>
                       <Form.Control
-                        type="email"
-                        placeholder="Enter email"
+                        type="text"
+                        placeholder="Enter username"
                         value={email}
                         onChange={handleEmailChange}
                         required
