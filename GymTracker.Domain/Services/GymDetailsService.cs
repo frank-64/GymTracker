@@ -15,14 +15,16 @@ namespace GymTracker.Domain.Services
     public class GymDetailsService : IGymDetailsService
     {
         private readonly string blobName;
-        private readonly string keyVaultName;
+        private readonly string adminDatabaseId = "admin";
+        private readonly string adminContainerId = "adminLogin";
         private readonly IAzureRepository _azureRepository;
+        private readonly ICosmosRepository _cosmosRepository;
 
-        public GymDetailsService(IAzureRepository azureRepository)
+        public GymDetailsService(IAzureRepository azureRepository, ICosmosRepository cosmosRepository)
         {
             _azureRepository = azureRepository;
+            _cosmosRepository = cosmosRepository;
             blobName = Environment.GetEnvironmentVariable("gymDetailsBlobName");
-            keyVaultName = Environment.GetEnvironmentVariable("keyVaultName");
         }
 
         public async Task<GymDetails> GetGymDetails()
@@ -47,18 +49,11 @@ namespace GymTracker.Domain.Services
 
         public async Task<bool> AdminLogin(Credentials credentials)
         {
-            var kvUri = $"https://{keyVaultName}.vault.azure.net";
-
-            var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
-
-            string secret = "";
-
-            var secretResponse = await client.GetSecretAsync(credentials.Username);
-            secret = secretResponse.Value.Value;
-
-            // Check if password provided matches stored hash password 
-            var valid = BCrypt.Net.BCrypt.Verify(credentials.Password, secret);
-            return valid;
+            await _cosmosRepository.CreateDatabaseAsync(adminDatabaseId);
+            await _cosmosRepository.CreateContainerAsync(adminContainerId, "/id");
+            Secret secret = await _cosmosRepository.GetItemAsync<Secret>(credentials.Username, credentials.Username);
+            var validPassword = BCrypt.Net.BCrypt.Verify(credentials.Password, secret.HashedPassword);
+            return validPassword;
         }
     }
 }

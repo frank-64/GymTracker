@@ -17,6 +17,9 @@ namespace GymTracker.Domain.Services
     {
         private readonly ICosmosRepository _cosmosRepository;
         private readonly int _maximumOccupancy;
+        // The name of the database and container we will create
+        private string trackingDatabaseId = "tracking";
+        private string trackingContainerId = "dailyTracked";
         public TrackingService(ICosmosRepository cosmosRepository)
         {
             _cosmosRepository = cosmosRepository;
@@ -24,13 +27,12 @@ namespace GymTracker.Domain.Services
         }
         public async Task<Occupancy> GetCurrentOccupancy()
         {
-            //TODO: Store max gym occupancy in gym settings db
-            await _cosmosRepository.CreateDatabaseAsync();
-            await _cosmosRepository.CreateContainerAsync();
+            await _cosmosRepository.CreateDatabaseAsync(trackingDatabaseId);
+            await _cosmosRepository.CreateContainerAsync(trackingContainerId, "/partitionKey");
             DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
             string currentMonth = currentDate.Month.ToString();
             string stringDate = currentDate.ToString("dd-MM-yyyy");
-            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync(currentMonth, stringDate);
+            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync<GymDayTracker>(currentMonth, stringDate);
             if (gymDayTracker == null)
             {
                 Console.WriteLine("Do something as missing tracker file");
@@ -84,13 +86,13 @@ namespace GymTracker.Domain.Services
 
         public async Task ManageInflux(int amount)
         {
-            await _cosmosRepository.CreateDatabaseAsync();
-            await _cosmosRepository.CreateContainerAsync();
+            await _cosmosRepository.CreateDatabaseAsync(trackingDatabaseId);
+            await _cosmosRepository.CreateContainerAsync(trackingContainerId, "/partitionKey");
             DateTimeOffset utcNow = DateTimeOffset.UtcNow;
             DateTimeOffset currentDate = new DateTimeOffset(utcNow.Year, utcNow.Month, utcNow.Day, 0, 0, 0, utcNow.Offset);
             string currentMonth = utcNow.Month.ToString();
             string stringDate = utcNow.ToString("dd-MM-yyyy");
-            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync(currentMonth, stringDate);
+            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync<GymDayTracker>(currentMonth, stringDate);
             if (gymDayTracker == null)
             {
                 await _cosmosRepository.AddItemsToContainerAsync(new GymDayTracker
@@ -112,13 +114,13 @@ namespace GymTracker.Domain.Services
 
         public async Task ManageOutflow(int amount)
         {
-            await _cosmosRepository.CreateDatabaseAsync();
-            await _cosmosRepository.CreateContainerAsync();
+            await _cosmosRepository.CreateDatabaseAsync(trackingDatabaseId);
+            await _cosmosRepository.CreateContainerAsync(trackingContainerId, "/partitionKey");
             DateTimeOffset utcNow = DateTimeOffset.UtcNow;
             DateTimeOffset currentDate = new DateTimeOffset(utcNow.Year, utcNow.Month, utcNow.Day, 0, 0, 0, utcNow.Offset);
             string currentMonth = utcNow.Month.ToString();
             string stringDate = utcNow.ToString("dd-MM-yyyy");
-            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync(currentMonth, stringDate);
+            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync<GymDayTracker>(currentMonth, stringDate);
             if (gymDayTracker == null)
             {
                 await _cosmosRepository.AddItemsToContainerAsync(new GymDayTracker
