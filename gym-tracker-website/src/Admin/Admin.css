@@ -1,0 +1,52 @@
+.title {
+  margin-bottom: 0px;
+}
+
+.admin {
+  background-color: #282c34;
+}
+
+.admin-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+td:first-child {
+  text-align: left;
+}
+
+p {
+  color: white;
+  font-size: calc(10px + 2vmin);
+}
+
+.subtitle-row {
+  margin-bottom: 0px;
+}
+
+.subtitle {
+  text-align: center;
+}
+
+.add-custom-hours-button {
+  text-align: center;
+}
+
+.footer {
+  position: fixed;
+}
+
+.custom-opening-hour label {
+  font-size: large;
+  text-align: left !important;
+}
+
+input:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}

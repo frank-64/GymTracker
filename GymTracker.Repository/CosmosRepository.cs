@@ -13,23 +13,11 @@ namespace CosmosGettingStartedTutorial
 {
     public class CosmosRepository : ICosmosRepository
     {
-        // The Azure Cosmos DB endpoint for running this sample.
         private readonly string EndpointUri;
-        // The primary key for the Azure Cosmos account.
         private readonly string PrimaryKey;
-
-        // The Cosmos client instance
         private CosmosClient _cosmosClient;
-
-        // The database we will create
         private Database _database;
-
-        // The container we will create.
         private Container _container;
-
-        // The name of the database and container we will create
-        private string databaseId = "tracking";
-        private string containerId = "dailyTracked";
 
         public CosmosRepository()
         {
@@ -38,46 +26,31 @@ namespace CosmosGettingStartedTutorial
             _cosmosClient = new CosmosClient(EndpointUri, PrimaryKey);
         }
 
-        // <CreateDatabaseAsync>
-        /// <summary>
-        /// Create the database if it does not exist
-        /// </summary>
-        public async Task CreateDatabaseAsync()
+        public async Task CreateDatabaseAsync(string databaseId)
         {
             // Create a new database
             _database = await _cosmosClient.CreateDatabaseIfNotExistsAsync(databaseId);
-            Console.WriteLine("Created Database: {0}\n", _database.Id);
         }
-        // </CreateDatabaseAsync>
 
-        // <CreateContainerAsync>
-        /// <summary>
-        /// Create the container if it does not exist. 
-        /// Specifiy "/partitionKey" as the partition key path since we're storing family information, to ensure good distribution of requests and storage.
-        /// </summary>
-        /// <returns></returns>
-        public async Task CreateContainerAsync()
+        public async Task CreateContainerAsync(string containerId, string partitionKeyFormat)
         {
             // Create a new container
-            _container = await _database.CreateContainerIfNotExistsAsync(containerId, "/partitionKey");
-            Console.WriteLine("Created Container: {0}\n", _container.Id);
+            _container = await _database.CreateContainerIfNotExistsAsync(containerId, partitionKeyFormat);
         }
-        // </CreateContainerAsync>
 
-        public async Task<ItemResponse<GymDayTracker>> GetItemAsync(string partitionKey, string id)
+        public async Task<ItemResponse<Item>> GetItemAsync<Item>(string partitionKey, string id)
         {
-            return await _container.ReadItemAsync<GymDayTracker>(id, new PartitionKey(partitionKey));
+            return await _container.ReadItemAsync<Item>(id, new PartitionKey(partitionKey));
         }
 
-        public async Task UpsertItemAsync(GymDayTracker gymDayTracker)
+        public async Task UpsertItemAsync<Item>(Item item)
         {
-            await _container.UpsertItemAsync(gymDayTracker);
+            await _container.UpsertItemAsync(item);
         }
 
-        // <AddItemsToContainerAsync>
         public async Task AddItemsToContainerAsync(GymDayTracker gymDayTracker)
         {
-            var item = await GetItemIfExistAsync(gymDayTracker.PartitionKey, gymDayTracker.Id);
+            var item = await GetItemIfExistAsync<GymDayTracker>(gymDayTracker.PartitionKey, gymDayTracker.Id);
             
             if (item != null)
             {
@@ -87,7 +60,7 @@ namespace CosmosGettingStartedTutorial
             {
                 try
                 {
-                    ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.CreateItemAsync<GymDayTracker>(gymDayTracker, new PartitionKey(gymDayTracker.PartitionKey));
+                    ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.CreateItemAsync(gymDayTracker, new PartitionKey(gymDayTracker.PartitionKey));
                     // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse. We can also access the RequestCharge property to see the amount of RUs consumed on this request.
                     Console.WriteLine("Created item in database with id: {0} Operation consumed {1} RUs.\n", gymDayTrackerResponse.Resource.Id, gymDayTrackerResponse.RequestCharge);
 
@@ -98,58 +71,23 @@ namespace CosmosGettingStartedTutorial
             }
         }
 
-        public async Task<ItemResponse<GymDayTracker>> GetItemIfExistAsync(string partitionKey, string id)
+        public async Task<ItemResponse<Item>> GetItemIfExistAsync<Item>(string partitionKey, string id)
         {
             try
             {
                 // Read the item to see if it exists.  
-                ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.ReadItemAsync<GymDayTracker>(id, new PartitionKey(partitionKey));
-                return gymDayTrackerResponse;
+                ItemResponse<Item> response = await _container.ReadItemAsync<Item>(id, new PartitionKey(partitionKey));
+                return response;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
         }
-        // </AddItemsToContainerAsync>
 
-        //// <QueryItemsAsync>
-        ///// <summary>
-        ///// Run a query (using Azure Cosmos DB SQL syntax) against the container
-        ///// Including the partition key value of lastName in the WHERE filter results in a more efficient query
-        ///// </summary>
-        //private async Task QueryItemsAsync()
-        //{
-        //    var sqlQueryText = "SELECT * FROM c WHERE c.PartitionKey = 'Andersen'";
-
-        //    Console.WriteLine("Running query: {0}\n", sqlQueryText);
-
-        //    QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-        //    FeedIterator<GymDayTracker> queryResultSetIterator = this.container.GetItemQueryIterator<GymDayTracker>(queryDefinition);
-
-        //    List<GymDayTracker> families = new List<GymDayTracker>();
-
-        //    while (queryResultSetIterator.HasMoreResults)
-        //    {
-        //        FeedResponse<GymDayTracker> currentResultSet = await queryResultSetIterator.ReadNextAsync();
-        //        foreach (GymDayTracker family in currentResultSet)
-        //        {
-        //            families.Add(family);
-        //            Console.WriteLine("\tRead {0}\n", family);
-        //        }
-        //    }
-        //}
-        // </QueryItemsAsync>
-
-        // </ReplaceFamilyItemAsync>
-
-        // <DeleteFamilyItemAsync>
-        /// <summary>
-        /// Delete an item in the container
-        /// </summary>
-        public async Task DeleteFamilyItemAsync(string partitionKey, string id)
+        public async Task DeleteItemAsync<Item>(string partitionKey, string id)
         {
-            ItemResponse<GymDayTracker> deletedResponse = await _container.DeleteItemAsync<GymDayTracker>(id,new PartitionKey(partitionKey));
+            ItemResponse<Item> deletedResponse = await _container.DeleteItemAsync<Item>(id,new PartitionKey(partitionKey));
             Console.WriteLine("Deleted Family [{0},{1}]\n", partitionKey, id);
         }
     }

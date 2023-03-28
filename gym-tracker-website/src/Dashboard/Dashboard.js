@@ -9,41 +9,20 @@ import Navbar from "../Components/Navbar";
 
 function Dashboard() {
   const [occupancyLevel, setOccupancy] = useState(0);
-  const [gymName, setGymName] = useState("ML Sport and Fitness Ltd");
-  const [gymStatus, setGymStatus] = useState(true);
-  const [gymStatusText, setGymStatusText] = useState("OPEN");
+  const [gymDetails, setGymDetails] = useState('');
+
   const [gymOccupancyConfiguration, setGymOccupancyConfiguration] = useState({
     color: "",
     text: "",
   });
 
-  const gymInfo = [
-    { day: "Monday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Tuesday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Wednesday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Thursday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Friday", startTime: "9:00 AM", endTime: "8:00 PM" },
-    { day: "Saturday", startTime: "10:00 AM", endTime: "6:00 PM" },
-    { day: "Sunday", startTime: "10:00 AM", endTime: "4:00 PM" },
-  ];
-
-  function determineGymStatus() {
-    //Make call to backend to determine gym details
-
-    if (!gymStatus) {
-      setGymStatusText("CLOSED");
-      setGymStatus(false);
-      setGymName("ML Sport and Fitness");
-    }
-  }
-
   var headers = {
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-  
 
   useEffect(() => {
+
     function fetchGymDetails() {
       fetch(
         "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?",
@@ -56,8 +35,7 @@ function Dashboard() {
         if (response.ok) {
           response.json().then((json) => {
             var gymDetailsObject = JSON.parse(json);
-            console.log(gymDetailsObject);
-            setGymName(gymDetailsObject.gymName);
+            setGymDetails(gymDetailsObject);
           });
         }
       });
@@ -97,7 +75,7 @@ function Dashboard() {
         navigateIcon={
           <FontAwesomeIcon icon={faChartLine} style={{ marginRight: "10px" }} />
         }
-        navigateTarget="/insights/"
+        navigateTarget="/insights"
       />
       <Container fluid>
         <Row className="subtitle-row">
@@ -105,8 +83,8 @@ function Dashboard() {
             <div className="subtitle">
               <p>
                 The Gym is currently:{" "}
-                <Badge bg={gymStatus ? "success" : "danger"}>
-                  {gymStatusText}
+                <Badge bg={gymDetails.IsOpen ? "success" : "danger"}>
+                  {gymDetails.IsOpen ? "OPEN" : "CLOSED"}
                 </Badge>
               </p>
             </div>
@@ -117,7 +95,8 @@ function Dashboard() {
             <div className="dashboard-section">
               <div>
                 <p>
-                  Opening hours for <Badge>{gymName}</Badge>
+                  Opening hours for{" "}
+                  <Badge>{gymDetails.GymName ? gymDetails.GymName : ""}</Badge>
                 </p>
               </div>
               <div>
@@ -130,11 +109,11 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {gymInfo.map((day) => (
-                      <tr key={day.day}>
-                        <td>{day.day}</td>
-                        <td>{day.startTime}</td>
-                        <td>{day.endTime}</td>
+                    {gymDetails.Hours?.map((day) => (
+                      <tr key={day.DayOfWeek}>
+                        <td>{day.DayOfWeek}</td>
+                        <td>{day.StartTime}</td>
+                        <td>{day.EndTime}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -144,7 +123,7 @@ function Dashboard() {
           </Col>
           <Col md={6} className="dashboard-column-right">
             <div className="dashboard-section">
-              {gymStatus ? (
+              {gymDetails.IsOpen ? (
                 <div>
                   <ReactSpeedometer
                     segments={5}
@@ -190,15 +169,16 @@ function Dashboard() {
                   />
                   <p>
                     Gym occupancy status is{" "}
-                    <p
+                    <span
                       style={{
                         color: gymOccupancyConfiguration.color,
                         display: "inline",
+                        fontSize: "100%",
                       }}
                     >
                       {" "}
                       {gymOccupancyConfiguration.text}{" "}
-                    </p>
+                    </span>
                     <br />
                     <em>{`${occupancyLevel}% capacity`}</em>
                   </p>
