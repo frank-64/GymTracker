@@ -56,13 +56,14 @@ function AdminLogin() {
         setSuccess("Valid username and password combination.");
         response.json().then((json) => {
           const jsonData = JSON.parse(json);
-          const token = jsonData.token;
-          localStorage.setItem("basicAuthToken", token);
+          console.log(jsonData);
+          const token = jsonData.Token;
+          localStorage.setItem("authToken", token);
           
           setTimeout(function() {
             navigate("/admin");
             setLoading(false);
-          }, 2000);
+          }, 1500);
         });
       } else {
         setError("Invalid username or password.");

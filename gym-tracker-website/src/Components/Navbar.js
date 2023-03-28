@@ -24,12 +24,19 @@ function Navbar(props) {
     1000
   );
 
+  const logout = () => {
+    if (props.logout) {
+      localStorage.clear("authToken");
+    }
+  };
+
   return (
     <div className="navbar">
       <div className="navbar-left">
         <Button
           onClick={() => {
             window.location.href = props.navigateTarget;
+            logout();
           }}
           variant="outline-light"
           style={{
