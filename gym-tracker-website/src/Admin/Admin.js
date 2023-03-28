@@ -1,7 +1,7 @@
-import { useState, useEffect, Fragment, navigate } from "react";
+import { useState, useEffect, Fragment } from "react";
 import "./Admin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
+import { faHome } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../Components/Navbar";
 import {
   Col,
@@ -14,8 +14,11 @@ import {
   Alert,
   Form,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import jwtDecode from "jwt-decode";
 
 function Admin() {
+  const navigate = useNavigate();
   const [gymDetails, setGymDetails] = useState("");
   const [tempGymDetails, setTempGymDetails] = useState("");
   const [isGymOpenInput, setIsGymClosedInput] = useState(false);
@@ -156,15 +159,35 @@ function Admin() {
     fetchGymDetails();
   }, []);
 
+
+  // Redirect the user back to the login page if they no longer have a token or it has expired
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    console.log(token);
+    if (!token || tokenExpired(token)) {
+      navigate("/admin-login");
+    }
+  }, [navigate]);
+
+  const tokenExpired = (token) => {
+    const decodedToken = jwtDecode(token);
+    const currentDateTime = new Date();
+    if (decodedToken.exp * 1000 < currentDateTime.getTime()) {
+      return true; // Token not expired yet
+    } 
+    return false; // Expired token
+  }
+
   return (
     <div className="admin">
       <Navbar
         title="Gym Occupancy Tracker: Admin"
-        navigateText="Gym Dashboard"
+        navigateText="Logout"
         navigateIcon={
-          <FontAwesomeIcon icon={faDumbbell} style={{ marginRight: "10px" }} />
+          <FontAwesomeIcon icon={faHome} style={{ marginRight: "10px" }} />
         }
-        navigateTarget="/"
+        navigateTarget="/admin-login"
+        logout={true}
       />
       <Container fluid>
         <Row className="subtitle-row">
