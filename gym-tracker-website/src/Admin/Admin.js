@@ -76,7 +76,7 @@ function Admin() {
             setError("End time must not be before start time.");
           }else{
             setError(null);
-            postCustomGymOpeningPeriod();
+            postCustomGymOpeningPeriod({Date: dateInput, IsGymOpen: isGymOpenInput, StartTime: startTimeInput, EndTime: endTimeInput});
           }
         }else{
           setError("Opening times not specified.");
@@ -84,6 +84,7 @@ function Admin() {
       }else{ // Closure on a specific date so no need for start/end time validation
         setError(null);
         setSuccess("Your update has been made.");
+        postCustomGymOpeningPeriod({Date: dateInput, IsGymOpen: isGymOpenInput});
       }
     }
   }
