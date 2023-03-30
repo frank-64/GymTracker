@@ -8,8 +8,8 @@ namespace GymTracker.Domain.Services
     public class GymDetailsService : IGymDetailsService
     {
         private readonly string blobName;
-        private readonly string adminDatabaseId = "admin";
-        private readonly string adminContainerId = "adminLogin";
+        private readonly string adminDatabaseId;
+        private readonly string adminContainerId;
         private readonly IAzureRepository _azureRepository;
         private readonly ICosmosRepository _cosmosRepository;
 
@@ -18,6 +18,8 @@ namespace GymTracker.Domain.Services
             _azureRepository = azureRepository;
             _cosmosRepository = cosmosRepository;
             blobName = Environment.GetEnvironmentVariable("gymDetailsBlobName");
+            adminDatabaseId = Environment.GetEnvironmentVariable("adminDatabaseId");
+            adminContainerId = Environment.GetEnvironmentVariable("adminContainerId");
         }
 
         public async Task<GymDetails> GetGymDetails()
@@ -29,6 +31,29 @@ namespace GymTracker.Domain.Services
                     return JsonConvert.DeserializeObject<GymDetails>(await reader.ReadToEndAsync());
                 }
             }
+        }
+
+        public async Task<bool> DetermineGymStatus()
+        {
+            // Getting the gym details from Blob Storage
+            GymDetails gymDetails = await GetGymDetails();
+
+            // Filtering the day in the opening hours to find the opening hours for the current day of the week
+            Day day = gymDetails.OpeningHours.Where(day => day.DayOfWeek.ToLower() == DateTime.Now.DayOfWeek.ToString().ToLower()).Single();
+
+            var startTime = DateTime.Parse(day.StartTime);
+            var endTime = DateTime.Parse(day.EndTime);
+
+            // Return true indiciating the gym is open if the current time falls in the start/end opening period set for the current day
+            return DateTime.Now.TimeOfDay >= startTime.TimeOfDay && DateTime.Now.TimeOfDay <= endTime.TimeOfDay;
+        }
+
+        public async Task<int> GetMaximumOccupancy()
+        {
+            // Getting the gym details from Blob Storage
+            GymDetails gymDetails = await GetGymDetails();
+
+            return gymDetails.MaxOccupancy;
         }
 
         public async Task UpdateGymDetails(GymDetails updatedGymDetails)
