@@ -8,13 +8,16 @@ import { getColorAndText } from "../Helper/helper";
 import Navbar from "../Components/Navbar";
 
 function Dashboard() {
-  const [occupancyLevel, setOccupancy] = useState(0);
-  const [gymDetails, setGymDetails] = useState('');
+  const [gymDetails, setGymDetails] = useState("");
+  const [gymStatus, setGymStatus] = useState("");
+  const [isOpen, setIsOpen] = useState(true);
+  const [occupancy, setOccupancy] = useState("0");
 
   const [gymOccupancyConfiguration, setGymOccupancyConfiguration] = useState({
     color: "",
     text: "",
   });
+  console.log(gymOccupancyConfiguration);
 
   var headers = {
     Accept: "application/json",
@@ -22,7 +25,6 @@ function Dashboard() {
   };
 
   useEffect(() => {
-
     function fetchGymDetails() {
       fetch(
         "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?",
@@ -41,9 +43,9 @@ function Dashboard() {
       });
     }
 
-    function fetchGymOccupancy() {
+    function fetchGymStatus() {
       fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
+        "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?",
         {
           mode: "cors",
           method: "GET",
@@ -52,19 +54,20 @@ function Dashboard() {
       ).then((response) => {
         if (response.ok) {
           response.json().then((json) => {
-            var occupancyObject = JSON.parse(json);
-            console.log(occupancyObject);
-            setOccupancy(occupancyObject.Percentage);
+            var gymStatusObject = JSON.parse(json);
+            setGymStatus(gymStatusObject);
+            setIsOpen(gymStatusObject.IsOpen);
+            setOccupancy(gymStatusObject.CapacityPercentage);
             setGymOccupancyConfiguration(
-              getColorAndText(occupancyObject.Percentage)
+              getColorAndText(gymStatusObject.CapacityPercentage)
             );
           });
         }
       });
     }
 
-    fetchGymOccupancy();
     fetchGymDetails();
+    fetchGymStatus();
   }, []);
 
   return (
@@ -83,8 +86,8 @@ function Dashboard() {
             <div className="subtitle">
               <p>
                 The Gym is currently:{" "}
-                <Badge bg={gymDetails.IsOpen ? "success" : "danger"}>
-                  {gymDetails.IsOpen ? "OPEN" : "CLOSED"}
+                <Badge bg={isOpen ? "success" : "danger"}>
+                  {isOpen ? "OPEN" : "CLOSED"}
                 </Badge>
               </p>
             </div>
@@ -109,7 +112,7 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {gymDetails.Hours?.map((day) => (
+                    {gymDetails.OpeningHours?.map((day) => (
                       <tr key={day.DayOfWeek}>
                         <td>{day.DayOfWeek}</td>
                         <td>{day.StartTime}</td>
@@ -123,14 +126,14 @@ function Dashboard() {
           </Col>
           <Col md={6} className="dashboard-column-right">
             <div className="dashboard-section">
-              {gymDetails.IsOpen ? (
+              {isOpen ? (
                 <div>
                   <ReactSpeedometer
                     segments={5}
                     width={600}
                     height={450}
                     maxValue={100}
-                    value={occupancyLevel}
+                    value={gymStatus.CapacityPercentage}
                     segmentColors={[
                       "green",
                       "limegreen",
@@ -138,7 +141,7 @@ function Dashboard() {
                       "tomato",
                       "firebrick",
                     ]}
-                    currentValueText={`${occupancyLevel}%`}
+                    currentValueText={gymStatus.CapacityPercentage && (`${gymStatus.CapacityPercentage}%`)}
                     customSegmentLabels={[
                       {
                         text: "Very Quiet",
@@ -180,7 +183,7 @@ function Dashboard() {
                       {gymOccupancyConfiguration.text}{" "}
                     </span>
                     <br />
-                    <em>{`${occupancyLevel}% capacity`}</em>
+                    <em>{`${occupancy}% capacity`}</em>
                   </p>
                 </div>
               ) : (

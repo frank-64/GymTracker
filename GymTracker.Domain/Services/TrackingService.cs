@@ -69,8 +69,16 @@ namespace GymTracker.Domain.Services
             GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
 
             // Return the occupancy of gym, whether it's currently open and if the admin manually closed it
-            GymStatus occupancy = new GymStatus(gymDayTracker.CurrentGymOccupancy, gymDayTracker.MaximumOccupancy, gymDayTracker.IsOpen, gymDayTracker.AdminClosedGym);
-            return occupancy;
+            GymStatus gymStatus = new GymStatus(gymDayTracker.CurrentGymOccupancy, gymDayTracker.MaximumOccupancy, gymDayTracker.IsOpen, gymDayTracker.AdminClosedGym);
+            return gymStatus;
+        }
+
+        public async Task UpdateGymStatusAsync(GymStatus gymStatus)
+        {
+            GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
+            gymDayTracker.AdminClosedGym = gymStatus.AdminClosedGym;
+
+            await _cosmosRepository.UpsertItemAsync(gymDayTracker);
         }
 
         public async Task IncrementCountAsync(int amount)

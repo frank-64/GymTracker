@@ -56,7 +56,7 @@ namespace GymTracker.Functions
 
 
         [FunctionName("GetGymStatus")]
-        public async Task<IActionResult> DetermineGymOccupancy(
+        public async Task<IActionResult> GetGymStatus(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getGymStatus")] HttpRequest req,
             ILogger log)
         {
@@ -65,6 +65,20 @@ namespace GymTracker.Functions
             var gymStatus = await _trackingService.GetGymStatusAsync();
             var json = JsonConvert.SerializeObject(gymStatus);
             return new OkObjectResult(json);
+        }
+
+        [FunctionName("UpdateGymStatus")]
+        public async Task<IActionResult> UpdateGymStatus(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateGymStatus")] HttpRequest req,
+        ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            GymStatus updatedGymStatus = JsonConvert.DeserializeObject<GymStatus>(requestBody);
+
+            await _trackingService.UpdateGymStatusAsync(updatedGymStatus);
+            return new OkResult();
         }
 
         [FunctionName("AdminLogin")]

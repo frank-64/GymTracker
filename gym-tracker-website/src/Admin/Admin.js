@@ -20,6 +20,7 @@ import jwtDecode from "jwt-decode";
 function Admin() {
   const navigate = useNavigate();
   const [gymDetails, setGymDetails] = useState("");
+  const [gymStatus, setGymStatus] = useState("");
   const [tempGymDetails, setTempGymDetails] = useState("");
   const [isGymOpenInput, setIsGymClosedInput] = useState(false);
   const [updatingOpeningHours, setUpdatingOpeningHours] = useState(false);
@@ -31,16 +32,16 @@ function Admin() {
   };
 
   const handleSelect = (eventKey) => {
-    const updatedGymDetails = { ...gymDetails };
+    const updatedGymStatus = { ...gymStatus };
     if (eventKey === "opened") {
-      updatedGymDetails.AdminClosedGym = false;
-      updatedGymDetails.IsOpen = true;
+      updatedGymStatus.AdminClosedGym = false;
+      updatedGymStatus.IsOpen = true;
     } else {
-      updatedGymDetails.AdminClosedGym = true;
-      updatedGymDetails.IsOpen = false;
+      updatedGymStatus.AdminClosedGym = true;
+      updatedGymStatus.IsOpen = false;
     }
-    setGymDetails(updatedGymDetails);
-    postGymDetails(updatedGymDetails);
+    setGymDetails(updatedGymStatus);
+    postGymStatus(updatedGymStatus);
   };
 
   function handleUpdateToggle() {
@@ -79,7 +80,7 @@ function Admin() {
     const { name, value } = e.target;
 
     const timeRegex = /^(0?[1-9]|1[0-2]):([0-5][0-9])\s?(AM|PM)$/i;
-    if(!timeRegex.test(value)){
+    if (!timeRegex.test(value)) {
       alert("The input did not match the expected pattern e.g. 9:30 PM");
       e.target.value = "";
       return;
@@ -88,23 +89,23 @@ function Admin() {
     const splitName = name.split("-");
     const isStartTime = splitName[0] === "StartTime" ? true : false;
     const updatedGymDetails = { ...gymDetails };
-    const updateHours = updatedGymDetails.Hours.map((hour) => {
-      if (hour.DayOfWeek === splitName[1]) {
+    const updatedOpeningHours = updatedGymDetails.OpeningHours.map((day) => {
+      if (day.DayOfWeek === splitName[1]) {
         if (isStartTime) {
           return {
-            ...hour,
+            ...day,
             StartTime: value,
           };
         } else {
           return {
-            ...hour,
+            ...day,
             EndTime: value,
           };
         }
       }
-      return hour;
+      return day;
     });
-    updatedGymDetails.Hours = updateHours;
+    updatedGymDetails.OpeningHours = updatedOpeningHours;
     setTempGymDetails(updatedGymDetails);
   };
 
@@ -137,6 +138,30 @@ function Admin() {
       });
   }
 
+  function postGymStatus(updatedGymStatus) {
+    fetch(
+      "https://gym-tracker-functions.azurewebsites.net/api/updateGymStatus?",
+      {
+        mode: "cors",
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(updatedGymStatus),
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response;
+      })
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("There was a problem with the request:", error);
+      });
+  }
+
   useEffect(() => {
     function fetchGymDetails() {
       fetch(
@@ -150,25 +175,41 @@ function Admin() {
         if (response.ok) {
           response.json().then((json) => {
             var gymDetailsObject = JSON.parse(json);
-            console.log(gymDetailsObject);
             setGymDetails(gymDetailsObject);
           });
         }
       });
     }
 
-    fetchGymDetails();
-  }, []);
+    function fetchGymStatus() {
+      fetch(
+        "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?",
+        {
+          mode: "cors",
+          method: "GET",
+          headers: headers,
+        }
+      ).then((response) => {
+        if (response.ok) {
+          response.json().then((json) => {
+            var gymStatusObject = JSON.parse(json);
+            setGymStatus(gymStatusObject);
+          });
+        }
+      });
+    }
 
+    fetchGymDetails();
+    fetchGymStatus();
+  }, []);
 
   // Redirect the user back to the login page if they no longer have a token or it has expired
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    console.log(token);
     if (!token || tokenExpired(token)) {
       setLoggedIn(false);
       navigate("/admin-login");
-    }else{
+    } else {
       setLoggedIn(true);
     }
   }, [navigate]);
@@ -178,9 +219,9 @@ function Admin() {
     const currentDateTime = new Date();
     if (decodedToken.exp * 1000 < currentDateTime.getTime()) {
       return true; // Token not expired yet
-    } 
+    }
     return false; // Expired token
-  }
+  };
 
   return (
     <div className="admin">
@@ -200,8 +241,8 @@ function Admin() {
               <div className="subtitle">
                 <p>
                   The Gym is currently:{" "}
-                  <Badge bg={gymDetails.IsOpen ? "success" : "danger"}>
-                    {gymDetails.IsOpen ? "OPEN" : "CLOSED"}
+                  <Badge bg={gymStatus.IsOpen ? "success" : "danger"}>
+                    {gymStatus.IsOpen ? "OPEN" : "CLOSED"}
                   </Badge>
                 </p>
               </div>
@@ -213,7 +254,9 @@ function Admin() {
                 <div>
                   <p>
                     Opening hours for{" "}
-                    <Badge>{gymDetails.GymName ? gymDetails.GymName : ""}</Badge>
+                    <Badge>
+                      {gymDetails.GymName ? gymDetails.GymName : ""}
+                    </Badge>
                   </p>
                 </div>
                 <div>
@@ -227,7 +270,7 @@ function Admin() {
                     </thead>
                     {updatingOpeningHours ? (
                       <tbody>
-                        {gymDetails.Hours?.map((day) => (
+                        {gymDetails.OpeningHours?.map((day) => (
                           <tr key={day.DayOfWeek}>
                             <td>{day.DayOfWeek}</td>
                             <td>
@@ -253,7 +296,7 @@ function Admin() {
                       </tbody>
                     ) : (
                       <tbody>
-                        {gymDetails.Hours?.map((day) => (
+                        {gymDetails.OpeningHours?.map((day) => (
                           <tr key={day.DayOfWeek}>
                             <td>{day.DayOfWeek}</td>
                             <td>{day.StartTime}</td>
@@ -267,7 +310,10 @@ function Admin() {
                 <div className="right-panel-toggle">
                   {updatingOpeningHours ? (
                     <div
-                      style={{ display: "flex", justifyContent: "space-between" }}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
                     >
                       <Button
                         variant="success"
@@ -296,10 +342,10 @@ function Admin() {
                     style={{ display: "inline-block" }}
                   >
                     <Dropdown.Toggle
-                      variant={gymDetails.IsOpen ? "success" : "danger"}
+                      variant={gymStatus.IsOpen ? "success" : "danger"}
                       id="dropdown-basic"
                     >
-                      {gymDetails.IsOpen ? "Open" : "Closed"}
+                      {gymStatus.IsOpen ? "Open" : "Closed"}
                     </Dropdown.Toggle>
 
                     <Dropdown.Menu>
@@ -341,44 +387,48 @@ function Admin() {
                       <Fragment>
                         <fieldset disabled={!isGymOpenInput}>
                           <Form.Group style={{ marginBottom: "25px" }}>
-                            <Form.Label>Start Time:</Form.Label>
-                            <Form.Control type="time" style={{ width: "50%" }} />
+                            <Form.Label>Start time:</Form.Label>
+                            <Form.Control
+                              type="time"
+                              style={{ width: "50%" }}
+                            />
                           </Form.Group>
                           <Form.Group style={{ marginBottom: "25px" }}>
-                            <Form.Label>End Time:</Form.Label>
-                            <Form.Control type="time" style={{ width: "50%" }} />
+                            <Form.Label>End time:</Form.Label>
+                            <Form.Control
+                              type="time"
+                              style={{ width: "50%" }}
+                            />
                           </Form.Group>
                         </fieldset>
                       </Fragment>
                     </Form>
                   </div>
                   <div>
-                    <Button variant="success">
-                      Add
-                    </Button>
+                    <Button variant="success">Add</Button>
                   </div>
                 </div>
               </div>
             </Col>
           </Row>
-        {/* TODO: Come back to this as errors are hard to see */}
-        <Col md={12}>
-          <div id="alertContainer" className="alert-container">
-            {alerts.map((alert) => (
-              <Alert
-                key={alert.messageTitle}
-                variant={alert.alertType}
-                dismissible
-                onClose={() => removeAlert(alert.messageTitle)}
-                className="footer"
-              >
-                <strong>{alert.messageTitle}</strong>
-                <span>{alert.message}</span>
-              </Alert>
-            ))}
-          </div>
-        </Col>
-      </Container>
+          {/* TODO: Come back to this as errors are hard to see */}
+          <Col md={12}>
+            <div id="alertContainer" className="alert-container">
+              {alerts.map((alert) => (
+                <Alert
+                  key={alert.messageTitle}
+                  variant={alert.alertType}
+                  dismissible
+                  onClose={() => removeAlert(alert.messageTitle)}
+                  className="footer"
+                >
+                  <strong>{alert.messageTitle}</strong>
+                  <span>{alert.message}</span>
+                </Alert>
+              ))}
+            </div>
+          </Col>
+        </Container>
       )}
     </div>
   );
