@@ -9,8 +9,9 @@ namespace GymTracker.Domain.Interfaces
 {
     public interface ITrackingService
     {
-        public Task ManageInflux(int amount);
-        public Task ManageOutflow(int amount);
-        public Task<Occupancy> GetCurrentOccupancy();
+        public Task IncrementCountAsync(int amount);
+        public Task DecrementCountAsync(int amount);
+        public Task<GymStatus> GetGymStatusAsync();
+        public Task<GymDayTracker> GetGymDayTrackerAsync();
     }
 }

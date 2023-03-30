@@ -54,6 +54,19 @@ namespace GymTracker.Functions
             return new OkResult();
         }
 
+
+        [FunctionName("GetGymStatus")]
+        public async Task<IActionResult> DetermineGymOccupancy(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getGymStatus")] HttpRequest req,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            var gymStatus = await _trackingService.GetGymStatusAsync();
+            var json = JsonConvert.SerializeObject(gymStatus);
+            return new OkObjectResult(json);
+        }
+
         [FunctionName("AdminLogin")]
         public async Task<IActionResult> AdminLogin(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "determineAdminLogin")] HttpRequest req,
@@ -99,19 +112,6 @@ namespace GymTracker.Functions
             return new BadRequestObjectResult("The password you provided was not correct.");
         }
 
-
-        [FunctionName("DetermineGymOccupancy")]
-        public async Task<IActionResult> DetermineGymOccupancy(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "determineGymOccupancy")] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            var occupancy = await _trackingService.GetCurrentOccupancy();
-            var jsonOccupancy = JsonConvert.SerializeObject(occupancy);
-            return new OkObjectResult(jsonOccupancy);
-        }
-
         [FunctionName("InfluxOccurrence")]
         public async Task<IActionResult> InfluxOccurrence(
            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "influxOccurance")] HttpRequest req,
@@ -125,11 +125,11 @@ namespace GymTracker.Functions
             influxAmount = influxAmount ?? data?.amount;
 
             log.LogInformation($"An influx of {influxAmount} person(s) has entered the gym. Attempting to update overall occupancy.");
-            await _trackingService.ManageInflux(int.Parse(influxAmount));
+            await _trackingService.IncrementCountAsync(int.Parse(influxAmount));
 
             string responseMessage = string.IsNullOrEmpty(influxAmount)
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"An influx of {influxAmount} person(s) entering the gym was recorded successfully..";
+                : $"An influx of {influxAmount} person(s) entering the gym was recorded successfully.";
 
             return new OkObjectResult(responseMessage);
         }
@@ -147,7 +147,7 @@ namespace GymTracker.Functions
             outflowAmount = outflowAmount ?? data?.amount;
 
             log.LogInformation($"An outflow of {outflowAmount} person(s) has left the gym. Attempting to update overall occupancy.");
-            await _trackingService.ManageOutflow(int.Parse(outflowAmount));
+            await _trackingService.DecrementCountAsync(int.Parse(outflowAmount));
 
             string responseMessage = string.IsNullOrEmpty(outflowAmount)
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."

@@ -1,57 +1,85 @@
-﻿using Azure;
-using GymTracker.Domain.Entities;
+﻿using GymTracker.Domain.Entities;
 using GymTracker.Domain.Interfaces;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow.Schemas;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GymTracker.Domain.Services
 {
     public class TrackingService : ITrackingService
     {
         private readonly ICosmosRepository _cosmosRepository;
-        private readonly int _maximumOccupancy;
-        // The name of the database and container we will create
-        private string trackingDatabaseId = "tracking";
-        private string trackingContainerId = "dailyTracked";
-        public TrackingService(ICosmosRepository cosmosRepository)
+        private readonly IGymDetailsService _gymDetailsService;
+
+        private string trackingDatabaseId;
+        private string trackingContainerId;
+        public TrackingService(ICosmosRepository cosmosRepository, IGymDetailsService gymDetailsService)
         {
             _cosmosRepository = cosmosRepository;
-            _maximumOccupancy = int.Parse(Environment.GetEnvironmentVariable("maxGymOccupancy"));
+            _gymDetailsService = gymDetailsService;
+            trackingDatabaseId = Environment.GetEnvironmentVariable("trackingDatabaseId");
+            trackingContainerId = Environment.GetEnvironmentVariable("trackingContainerId");
         }
-        public async Task<Occupancy> GetCurrentOccupancy()
+
+        public async Task<GymDayTracker> GetGymDayTrackerAsync()
         {
+            // Setting up database and container locally
             await _cosmosRepository.CreateDatabaseAsync(trackingDatabaseId);
-            await _cosmosRepository.CreateContainerAsync(trackingContainerId, "/partitionKey");
-            DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
-            string currentMonth = currentDate.Month.ToString();
-            string stringDate = currentDate.ToString("dd-MM-yyyy");
-            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync<GymDayTracker>(currentMonth, stringDate);
-            if (gymDayTracker == null)
+            await _cosmosRepository.CreateContainerAsync(trackingContainerId, "/month");
+
+            // Getting the current date and month as these are the id and partitionKey respectively for the GymDayTracker file
+            DateTimeOffset currentDateTime = DateTime.Now;
+            string currentMonth = currentDateTime.Month.ToString();
+            string stringDate = DateOnly.FromDateTime(currentDateTime.Date).ToString("dd-MM-yyyy");
+            DateTimeOffset currentDate = new DateTimeOffset(currentDateTime.Year, currentDateTime.Month, currentDateTime.Day, 0, 0, 0, currentDateTime.Offset);
+
+            GymDayTracker gymDayTracker = null;
+            var gymDayTrackerItemResponse = await _cosmosRepository.GetItemAsync<GymDayTracker>(stringDate, currentMonth);
+
+            if (gymDayTrackerItemResponse == null) // GymDayTracker file has not been created yet, make a new one
             {
-                Console.WriteLine("Do something as missing tracker file");
-                return new Occupancy();
+                gymDayTracker = new GymDayTracker {
+                    Id = stringDate,
+                    Month = currentMonth,
+                    CurrentDate = currentDate,
+                    IsOpen = false,
+                    AdminClosedGym = false
+                };
+                await _cosmosRepository.AddGymDayTrackerToContainer(gymDayTracker); // GymDayTracker file already exists
             }
             else
             {
-                Occupancy occupancy = new Occupancy(gymDayTracker.Resource.CurrentGymOccupancy, _maximumOccupancy);
-                return occupancy;
+                gymDayTracker = gymDayTrackerItemResponse.Resource;
             }
+
+            // If Admin has closed the gym don't do anything else and return
+            if (gymDayTracker.AdminClosedGym)
+            {
+                gymDayTracker.IsOpen = false;
+                return gymDayTracker;
+            }
+
+            var isOpen = await _gymDetailsService.DetermineGymStatus();
+            var maxOccupancy = await _gymDetailsService.GetMaximumOccupancy();
+            gymDayTracker.IsOpen = isOpen;
+            gymDayTracker.MaximumOccupancy = maxOccupancy;
+            return gymDayTracker;
         }
 
-        public async void IncrementCountAsync(ItemResponse<GymDayTracker> itemResponse, int amount)
+        public async Task<GymStatus> GetGymStatusAsync()
         {
-            GymDayTracker gymDayTracker = itemResponse.Resource;
+            GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
+
+            // Return the occupancy of gym, whether it's currently open and if the admin manually closed it
+            GymStatus occupancy = new GymStatus(gymDayTracker.CurrentGymOccupancy, gymDayTracker.MaximumOccupancy, gymDayTracker.IsOpen, gymDayTracker.AdminClosedGym);
+            return occupancy;
+        }
+
+        public async Task IncrementCountAsync(int amount)
+        {
+            GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
 
             gymDayTracker.CurrentGymOccupancy += amount;
 
-            if (!(gymDayTracker.CurrentGymOccupancy >= _maximumOccupancy))
+            if (!(gymDayTracker.CurrentGymOccupancy >= gymDayTracker.MaximumOccupancy))
             {
                 // Set highest occupancy if more than current highest occupancy
                 if (gymDayTracker.CurrentGymOccupancy > gymDayTracker.HighestGymOccupancy)
@@ -59,17 +87,14 @@ namespace GymTracker.Domain.Services
                     gymDayTracker.HighestGymOccupancy = gymDayTracker.CurrentGymOccupancy;
                 }
 
-                // Update last modified time of item
-                gymDayTracker.LastModified = DateTimeOffset.UtcNow;
-
                 //Update item
                 await _cosmosRepository.UpsertItemAsync(gymDayTracker);
             }
         }
 
-        public async void DecrementCountAsync(ItemResponse<GymDayTracker> itemResponse, int amount)
+        public async Task DecrementCountAsync(int amount)
         {
-            GymDayTracker gymDayTracker = itemResponse.Resource;
+            GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
 
             if (gymDayTracker.CurrentGymOccupancy - amount >= 0)
             {
@@ -79,65 +104,8 @@ namespace GymTracker.Domain.Services
             {
                 gymDayTracker.CurrentGymOccupancy = 0;
             }
-            gymDayTracker.LastModified = DateTimeOffset.UtcNow;
 
             await _cosmosRepository.UpsertItemAsync(gymDayTracker);
-        }
-
-        public async Task ManageInflux(int amount)
-        {
-            await _cosmosRepository.CreateDatabaseAsync(trackingDatabaseId);
-            await _cosmosRepository.CreateContainerAsync(trackingContainerId, "/partitionKey");
-            DateTimeOffset utcNow = DateTimeOffset.UtcNow;
-            DateTimeOffset currentDate = new DateTimeOffset(utcNow.Year, utcNow.Month, utcNow.Day, 0, 0, 0, utcNow.Offset);
-            string currentMonth = utcNow.Month.ToString();
-            string stringDate = utcNow.ToString("dd-MM-yyyy");
-            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync<GymDayTracker>(currentMonth, stringDate);
-            if (gymDayTracker == null)
-            {
-                await _cosmosRepository.AddItemsToContainerAsync(new GymDayTracker
-                {
-                    Id = stringDate,
-                    PartitionKey = currentMonth,
-                    CurrentDate = currentDate,
-                    LastModified = utcNow,
-                    CreatedOn = utcNow,
-                    CurrentGymOccupancy = amount,
-                    HighestGymOccupancy = amount,
-                });
-            }
-            else
-            {
-                IncrementCountAsync(gymDayTracker, amount);
-            }
-        }
-
-        public async Task ManageOutflow(int amount)
-        {
-            await _cosmosRepository.CreateDatabaseAsync(trackingDatabaseId);
-            await _cosmosRepository.CreateContainerAsync(trackingContainerId, "/partitionKey");
-            DateTimeOffset utcNow = DateTimeOffset.UtcNow;
-            DateTimeOffset currentDate = new DateTimeOffset(utcNow.Year, utcNow.Month, utcNow.Day, 0, 0, 0, utcNow.Offset);
-            string currentMonth = utcNow.Month.ToString();
-            string stringDate = utcNow.ToString("dd-MM-yyyy");
-            var gymDayTracker = await _cosmosRepository.GetItemIfExistAsync<GymDayTracker>(currentMonth, stringDate);
-            if (gymDayTracker == null)
-            {
-                await _cosmosRepository.AddItemsToContainerAsync(new GymDayTracker
-                {
-                    Id = stringDate,
-                    PartitionKey = currentMonth,
-                    CurrentDate = currentDate,
-                    LastModified = utcNow,
-                    CreatedOn = utcNow,
-                    CurrentGymOccupancy = amount,
-                    HighestGymOccupancy = amount,
-                });
-            }
-            else
-            {
-                DecrementCountAsync(gymDayTracker, amount);
-            }
         }
     }
 }
