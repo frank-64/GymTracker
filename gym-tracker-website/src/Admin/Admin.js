@@ -16,16 +16,19 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import jwtDecode from "jwt-decode";
+import { fetchData, postData } from "../Helper/helper";
 
 function Admin() {
   const navigate = useNavigate();
   const [gymDetails, setGymDetails] = useState("");
   const [gymStatus, setGymStatus] = useState("");
-  const [tempGymDetails, setTempGymDetails] = useState("");
   const [isGymOpenInput, setIsGymClosedInput] = useState(false);
   const [updatingOpeningHours, setUpdatingOpeningHours] = useState(false);
-  const [alerts, setAlerts] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const getGymDetailsUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
+  const getGymStatusUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
+  const postGymDetailsUrl = "https://gym-tracker-functions.azurewebsites.net/api/updateGymDetails?";
+  const postGymStatusUrl = "https://gym-tracker-functions.azurewebsites.net/api/updateGymStatus?";
 
   const handleCheckboxChange = (event) => {
     setIsGymClosedInput(event.target.checked);
@@ -40,7 +43,7 @@ function Admin() {
       updatedGymStatus.AdminClosedGym = true;
       updatedGymStatus.IsOpen = false;
     }
-    setGymDetails(updatedGymStatus);
+    setGymStatus(updatedGymStatus);
     postGymStatus(updatedGymStatus);
   };
 
@@ -50,31 +53,8 @@ function Admin() {
 
   function submitOpeningHours() {
     setUpdatingOpeningHours(false);
-    if (tempGymDetails === "") {
-      addAlert("Error:", "You did not make any changes to update!", "danger");
-    } else {
-      postGymDetails(tempGymDetails);
-      setGymDetails(tempGymDetails);
-      setTempGymDetails(gymDetails);
-    }
+    postGymDetails(gymDetails);
   }
-
-  const addAlert = (messageTitle, message, alertType) => {
-    setAlerts((prevAlerts) => [
-      ...prevAlerts,
-      {
-        messageTitle,
-        message,
-        alertType,
-      },
-    ]);
-  };
-
-  const removeAlert = (id) => {
-    setAlerts((prevAlerts) =>
-      prevAlerts.filter((alert) => alert.messageTitle !== id)
-    );
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -89,118 +69,79 @@ function Admin() {
     const splitName = name.split("-");
     const isStartTime = splitName[0] === "StartTime" ? true : false;
     const updatedGymDetails = { ...gymDetails };
+    const upperValue = value.toUpperCase();
     const updatedOpeningHours = updatedGymDetails.OpeningHours.map((day) => {
       if (day.DayOfWeek === splitName[1]) {
         if (isStartTime) {
           return {
             ...day,
-            StartTime: value,
+            StartTime: upperValue,
           };
         } else {
           return {
             ...day,
-            EndTime: value,
+            EndTime: upperValue,
           };
         }
       }
       return day;
     });
     updatedGymDetails.OpeningHours = updatedOpeningHours;
-    setTempGymDetails(updatedGymDetails);
+    setGymDetails(updatedGymDetails);
   };
+  
 
-  var headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-  };
+  const handleGymDetailsResponse = (response) => {
+    setGymDetails(response);
+  }
+
+  const handleGymStatusResponse = (response) => {
+    setGymStatus(response);
+  }
+
+  const handleGymDetailsPostNotOk = () => {
+
+  }
+
+  const handleGymStatusPostNotOk = () => {
+
+  }
+
+  const handleError = (error) => {
+    //TODO: Add alert with error message
+    console.error(error);
+  }
+
+  const handleOk = (json) => {
+    console.log(json);
+  }
+
+  const handleNotOk = (json) => {
+    console.log(json);
+  }
+
 
   function postGymDetails(updatedGymDetails) {
-    fetch(
-      "https://gym-tracker-functions.azurewebsites.net/api/updateGymDetails?",
-      {
-        mode: "cors",
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(updatedGymDetails),
-      }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response;
-      })
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the request:", error);
-      });
+    var body = JSON.stringify(updatedGymDetails);
+    postData(postGymDetailsUrl, body, handleOk, handleGymDetailsPostNotOk, handleError);
   }
 
   function postGymStatus(updatedGymStatus) {
-    fetch(
-      "https://gym-tracker-functions.azurewebsites.net/api/updateGymStatus?",
-      {
-        mode: "cors",
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(updatedGymStatus),
-      }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response;
-      })
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the request:", error);
-      });
+    var body = JSON.stringify(updatedGymStatus);
+    postData(postGymStatusUrl, body, handleOk, handleGymStatusPostNotOk, handleError);
   }
 
   useEffect(() => {
     function fetchGymDetails() {
-      fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?",
-        {
-          mode: "cors",
-          method: "GET",
-          headers: headers,
-        }
-      ).then((response) => {
-        if (response.ok) {
-          response.json().then((json) => {
-            var gymDetailsObject = JSON.parse(json);
-            setGymDetails(gymDetailsObject);
-          });
-        }
-      });
+      fetchData(getGymDetailsUrl, handleGymDetailsResponse, handleNotOk, handleError);
     }
 
     function fetchGymStatus() {
-      fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?",
-        {
-          mode: "cors",
-          method: "GET",
-          headers: headers,
-        }
-      ).then((response) => {
-        if (response.ok) {
-          response.json().then((json) => {
-            var gymStatusObject = JSON.parse(json);
-            setGymStatus(gymStatusObject);
-          });
-        }
-      });
+      fetchData(getGymStatusUrl, handleGymStatusResponse, handleNotOk, handleError);
     }
 
-    fetchGymDetails();
-    fetchGymStatus();
+  fetchGymStatus();
+  fetchGymDetails();
   }, []);
 
   // Redirect the user back to the login page if they no longer have a token or it has expired
@@ -411,23 +352,6 @@ function Admin() {
               </div>
             </Col>
           </Row>
-          {/* TODO: Come back to this as errors are hard to see */}
-          <Col md={12}>
-            <div id="alertContainer" className="alert-container">
-              {alerts.map((alert) => (
-                <Alert
-                  key={alert.messageTitle}
-                  variant={alert.alertType}
-                  dismissible
-                  onClose={() => removeAlert(alert.messageTitle)}
-                  className="footer"
-                >
-                  <strong>{alert.messageTitle}</strong>
-                  <span>{alert.message}</span>
-                </Alert>
-              ))}
-            </div>
-          </Col>
         </Container>
       )}
     </div>

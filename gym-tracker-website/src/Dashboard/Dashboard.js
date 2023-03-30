@@ -6,64 +6,54 @@ import { faChartLine } from "@fortawesome/free-solid-svg-icons";
 import { Col, Container, Row, Table, Badge } from "react-bootstrap";
 import { getColorAndText } from "../Helper/helper";
 import Navbar from "../Components/Navbar";
+import { fetchData } from "../Helper/helper";
 
 function Dashboard() {
   const [gymDetails, setGymDetails] = useState("");
   const [gymStatus, setGymStatus] = useState("");
   const [isOpen, setIsOpen] = useState(true);
   const [occupancy, setOccupancy] = useState("0");
+  const getGymDetailsUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
+  const getGymStatusUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
 
   const [gymOccupancyConfiguration, setGymOccupancyConfiguration] = useState({
     color: "",
     text: "",
   });
-  console.log(gymOccupancyConfiguration);
 
-  var headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-  };
+  const handleGymDetailsResponse = (gymDetailsObject) => {
+    setGymDetails(gymDetailsObject)
+  }
+
+  const handleGymStatusResponse = (gymStatusObject) => {
+    setGymStatus(gymStatusObject);
+    setIsOpen(gymStatusObject.IsOpen);
+    setOccupancy(gymStatusObject.CapacityPercentage);
+    setGymOccupancyConfiguration(
+      getColorAndText(gymStatusObject.CapacityPercentage)
+    );
+  }
+
+  const handleGymStatusFetchNotOk = () => {
+    //TODO: Add alerts to dashboard
+  }
+
+  const handleGymDetailsFetchNotOk = () => {
+    //TODO: Add alerts to dashboard
+  }
+
+  const handleError = () => {
+    //TODO: Add alerts to dashboard
+  }
 
   useEffect(() => {
-    function fetchGymDetails() {
-      fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?",
-        {
-          mode: "cors",
-          method: "GET",
-          headers: headers,
-        }
-      ).then((response) => {
-        if (response.ok) {
-          response.json().then((json) => {
-            var gymDetailsObject = JSON.parse(json);
-            setGymDetails(gymDetailsObject);
-          });
-        }
-      });
+    function fetchGymDetails(){
+      fetchData(getGymDetailsUrl, handleGymDetailsResponse, handleGymDetailsFetchNotOk, handleError);
     }
 
+
     function fetchGymStatus() {
-      fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?",
-        {
-          mode: "cors",
-          method: "GET",
-          headers: headers,
-        }
-      ).then((response) => {
-        if (response.ok) {
-          response.json().then((json) => {
-            var gymStatusObject = JSON.parse(json);
-            setGymStatus(gymStatusObject);
-            setIsOpen(gymStatusObject.IsOpen);
-            setOccupancy(gymStatusObject.CapacityPercentage);
-            setGymOccupancyConfiguration(
-              getColorAndText(gymStatusObject.CapacityPercentage)
-            );
-          });
-        }
-      });
+      fetchData(getGymStatusUrl, handleGymStatusResponse, handleGymStatusFetchNotOk, handleError);
     }
 
     fetchGymDetails();

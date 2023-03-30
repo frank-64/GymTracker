@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../Components/Navbar";
 import { useNavigate } from "react-router-dom";
+import { postData } from "../Helper/helper";
 
 import {
   Col,
@@ -23,6 +24,8 @@ function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const adminLoginUrl = "https://gym-tracker-functions.azurewebsites.net/api/determineAdminLogin?"
+
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -31,49 +34,38 @@ function AdminLogin() {
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
   };
-  var headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-  };
+
+  const handleResponse = (tokenResponse) => {
+    setError(null);
+    setSuccess("Valid username and password combination.");
+    const token = tokenResponse.Token;
+    localStorage.setItem("authToken", token);
+
+    setTimeout(function () {
+      navigate("/admin");
+      setLoading(false);
+    }, 1500);
+  }
+
+  const handleNotOk = () => {
+    setError("Invalid username or password.");
+    setSuccess(null);
+    setLoading(false);
+  }
+
+  const handleError = () => {
+    setError("An unexpected error occurred.");
+    setSuccess(null);
+    setLoading(false);
+  }
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
-    try {
-      const response = await fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/determineAdminLogin?",
-        {
-          mode: "cors",
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify({ Username: username, Password: password }),
-        }
-      );
-      if (response.ok) {
-        setError(null);
-        setSuccess("Valid username and password combination.");
-        response.json().then((json) => {
-          const jsonData = JSON.parse(json);
-          const token = jsonData.Token;
-          localStorage.setItem("authToken", token);
-
-          setTimeout(function () {
-            navigate("/admin");
-            setLoading(false);
-          }, 1500);
-        });
-      } else {
-        setError("Invalid username or password.");
-        setSuccess(null);
-        setLoading(false);
-      }
-    } catch (err) {
-      setError("An unexpected error occurred.");
-      setSuccess(null);
-      setLoading(false);
-    }
+    const body = JSON.stringify({ Username: username, Password: password });
+    postData(adminLoginUrl, body, handleResponse, handleNotOk, handleError);
   };
 
   return (

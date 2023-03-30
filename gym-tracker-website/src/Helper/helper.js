@@ -20,3 +20,59 @@ export function getColorAndText(num) {
   
     return { color, text };
 }
+
+const headers = {
+  Accept: "application/json",
+  "Content-Type": "application/json",
+};
+
+export function fetchData(url, handleResponse, handleNotOk, handleError){
+    fetch(url, {
+      mode: "cors",
+      method: "GET",
+      headers: headers,
+    }).then((response) => {
+      if (response.ok) {
+        response.json().then((json) => {
+          handleResponse(JSON.parse(json));
+        });
+      } else if (response.status === 429) {
+        const retryAfter = response.headers.get("Retry-After");
+        if (retryAfter) {
+          setTimeout(() => {
+            fetchData(url, handleResponse, handleNotOk, handleError);
+          }, retryAfter * 1000);
+        }
+      }else{
+        handleNotOk();
+      }
+    }).catch((error) => {
+      handleError(error);
+    });
+};
+
+export function postData(url, body, handleResponse, handleNotOk, handleError){
+  fetch(url, {
+    mode: "cors",
+    method: "POST",
+    headers: headers,
+    body: body
+  }).then((response) => {
+    if (response.ok) {
+      response.json().then((json) => {
+        handleResponse(JSON.parse(json));
+      });
+    } else if (response.status === 429) {
+      const retryAfter = response.headers.get("Retry-After");
+      if (retryAfter) {
+        setTimeout(() => {
+          fetchData(url, body, handleResponse, handleNotOk, handleError);
+        }, retryAfter * 1000);
+      }
+    }else{
+      handleNotOk();
+    }
+  }).catch((error) => {
+    handleError(error);
+  });
+};
