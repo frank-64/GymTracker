@@ -9,5 +9,6 @@ namespace GymTracker.Domain.Interfaces
         public Task<int> GetMaximumOccupancy();
         public Task UpdateGymDetails(GymDetails updatedGymDetails);
         public Task<bool> AdminLogin(Credentials credentials);
+        public Task SetCustomOpeningPeriod(CustomOpeningHour customOpeningHour);
     }
 }
