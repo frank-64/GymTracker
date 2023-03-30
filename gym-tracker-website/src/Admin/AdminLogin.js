@@ -24,8 +24,8 @@ function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const adminLoginUrl = "https://gym-tracker-functions.azurewebsites.net/api/determineAdminLogin?"
-
+  const adminLoginUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/determineAdminLogin?";
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -45,19 +45,19 @@ function AdminLogin() {
       navigate("/admin");
       setLoading(false);
     }, 1500);
-  }
+  };
 
   const handleNotOk = () => {
     setError("Invalid username or password.");
     setSuccess(null);
     setLoading(false);
-  }
+  };
 
   const handleError = () => {
     setError("An unexpected error occurred.");
     setSuccess(null);
     setLoading(false);
-  }
+  };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();

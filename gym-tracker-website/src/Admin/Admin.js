@@ -11,8 +11,9 @@ import {
   Badge,
   Dropdown,
   Button,
-  Alert,
+  Card,
   Form,
+  Alert
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import jwtDecode from "jwt-decode";
@@ -22,17 +23,70 @@ function Admin() {
   const navigate = useNavigate();
   const [gymDetails, setGymDetails] = useState("");
   const [gymStatus, setGymStatus] = useState("");
-  const [isGymOpenInput, setIsGymClosedInput] = useState(false);
   const [updatingOpeningHours, setUpdatingOpeningHours] = useState(false);
+
+  // Form variables for setting and getting
+  const [isGymOpenInput, setIsGymClosedInput] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [dateInput, setDateInput] = useState("");
+  const [startTimeInput, setStartTimeInput] = useState("");
+  const [endTimeInput, setEndTimeInput] = useState("");
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  // API URLs
   const getGymDetailsUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
   const getGymStatusUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
   const postGymDetailsUrl = "https://gym-tracker-functions.azurewebsites.net/api/updateGymDetails?";
   const postGymStatusUrl = "https://gym-tracker-functions.azurewebsites.net/api/updateGymStatus?";
+  const postCustomGymOpeningPeriodURL = "https://gym-tracker-functions.azurewebsites.net/api/setCustomOpeningPeriod?";
+
+  const handleStartTimeInputChange = (e) => {
+    setStartTimeInput(e.target.value);
+  };
+
+  const handleEndTimeInputChange = (e) => {
+    setEndTimeInput(e.target.value);
+  };
+
+  const handleDateInputChange = (e) => {
+    setDateInput(e.target.value);
+  };
 
   const handleCheckboxChange = (event) => {
     setIsGymClosedInput(event.target.checked);
+    if(isGymOpenInput){
+      setStartTimeInput("");
+      setEndTimeInput("");
+    }
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Form validation
+    if(dateInput === ""){
+      setError("You must enter a date!");
+    }else{
+      if(isGymOpenInput){
+        // Updated opening hours on a specific day
+        // Need to ensure the values are set and the end time is not before the start time
+        if((startTimeInput !== "" && endTimeInput !== "")){
+          if(endTimeInput < startTimeInput){
+            setError("End time must not be before start time.");
+          }else{
+            setError(null);
+            postCustomGymOpeningPeriod();
+          }
+        }else{
+          setError("Opening times not specified.");
+        }
+      }else{ // Closure on a specific date so no need for start/end time validation
+        setError(null);
+        setSuccess("Your update has been made.");
+      }
+    }
+  }
 
   const handleSelect = (eventKey) => {
     const updatedGymStatus = { ...gymStatus };
@@ -99,6 +153,10 @@ function Admin() {
     setGymStatus(response);
   }
 
+  const handleCustomOpeningPostNotOk = () => {
+    setError("An issue occurred when adding the closure or setting a specific opening hour.");
+  }
+
   const handleGymDetailsPostNotOk = () => {
 
   }
@@ -108,16 +166,24 @@ function Admin() {
   }
 
   const handleError = (error) => {
-    //TODO: Add alert with error message
     console.error(error);
   }
 
   const handleOk = (json) => {
-    console.log(json);
+
   }
 
-  const handleNotOk = (json) => {
-    console.log(json);
+  const handleCustomOpeningOk = (json) => {
+    setSuccess("Your update has been made successfully.");
+  }
+
+  const handleNotOk = () => {
+
+  }
+
+  function postCustomGymOpeningPeriod(customOpeningPeriod) {
+    var body = JSON.stringify(customOpeningPeriod);
+    postData(postGymDetailsUrl, body, handleCustomOpeningOk, handleCustomOpeningPostNotOk, handleError);
   }
 
 
@@ -301,52 +367,65 @@ function Admin() {
               <div className="admin-section">
                 <div className="custom-opening-hour">
                   <div>
-                    <p>Add Closure or Set Specific Opening Hours</p>
-                  </div>
-                  <div>
-                    <Form>
-                      <Form.Group style={{ marginBottom: "20px" }}>
-                        <Form.Label>Date:</Form.Label>
-                        <Form.Control type="date" style={{ width: "50%" }} />
-                      </Form.Group>
-                      <Form.Group
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Form.Label style={{ marginRight: "10px" }}>
-                          Will the gym be open?:
-                        </Form.Label>
-                        <Form.Check
-                          inline
-                          type="checkbox"
-                          checked={isGymOpenInput}
-                          onChange={handleCheckboxChange}
-                        />
-                      </Form.Group>
-                      <Fragment>
-                        <fieldset disabled={!isGymOpenInput}>
-                          <Form.Group style={{ marginBottom: "25px" }}>
-                            <Form.Label>Start time:</Form.Label>
-                            <Form.Control
-                              type="time"
-                              style={{ width: "50%" }}
-                            />
-                          </Form.Group>
-                          <Form.Group style={{ marginBottom: "25px" }}>
-                            <Form.Label>End time:</Form.Label>
-                            <Form.Control
-                              type="time"
-                              style={{ width: "50%" }}
-                            />
-                          </Form.Group>
-                        </fieldset>
-                      </Fragment>
-                    </Form>
-                  </div>
-                  <div>
-                    <Button variant="success">Add</Button>
+                    <Card className="custom-opening-hour-card">
+                      <Card.Title>Add Closure or Specific Opening Hours</Card.Title>
+                        <Card.Body>
+                          {error && <Alert variant="danger">{error}</Alert>}
+                          {success && !error && (
+                            <Alert variant="success">{success}</Alert>
+                          )}
+                          <Form onSubmit={handleSubmit}>
+                            <Form.Group style={{ marginBottom: "20px" }}>
+                              <Form.Label>Date:</Form.Label>
+                              <Form.Control 
+                                type="date"
+                                value={dateInput}
+                                onChange={handleDateInputChange}
+                                required
+                              />
+                            </Form.Group>
+                            <Form.Group
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Form.Label style={{ marginRight: "10px" }}>
+                                Will the gym be open?:
+                              </Form.Label>
+                              <Form.Check
+                                inline
+                                type="checkbox"
+                                checked={isGymOpenInput}
+                                onChange={handleCheckboxChange}
+                              />
+                            </Form.Group>
+                            <Fragment>
+                              <fieldset disabled={!isGymOpenInput}>
+                                <Form.Group style={{ marginBottom: "25px" }}>
+                                  <Form.Label>Start time:</Form.Label>
+                                  <Form.Control
+                                    value={startTimeInput}
+                                    onChange={handleStartTimeInputChange}
+                                    type="time"
+                                  />
+                                </Form.Group>
+                                <Form.Group style={{ marginBottom: "25px" }}>
+                                  <Form.Label>End time:</Form.Label>
+                                  <Form.Control
+                                    value={endTimeInput}
+                                    onChange={handleEndTimeInputChange}
+                                    type="time"
+                                  />
+                                </Form.Group>
+                              </fieldset>
+                            </Fragment>
+                            <div className="form-button">
+                              <Button variant="success" type="submit">Add Closure/Opening Hour Update</Button>
+                            </div>
+                          </Form>
+                        </Card.Body>
+                      </Card>
                   </div>
                 </div>
               </div>
