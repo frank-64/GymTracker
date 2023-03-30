@@ -51,7 +51,8 @@ namespace GymTracker.Functions
             GymDetails updatedGymDetails = JsonConvert.DeserializeObject<GymDetails>(requestBody);
 
             await _gymDetailsService.UpdateGymDetails(updatedGymDetails);
-            return new OkResult();
+            var json = JsonConvert.SerializeObject(updatedGymDetails);
+            return new OkObjectResult(json);
         }
 
 
@@ -78,7 +79,8 @@ namespace GymTracker.Functions
             GymStatus updatedGymStatus = JsonConvert.DeserializeObject<GymStatus>(requestBody);
 
             await _trackingService.UpdateGymStatusAsync(updatedGymStatus);
-            return new OkResult();
+            var json = JsonConvert.SerializeObject(updatedGymStatus);
+            return new OkObjectResult(json);
         }
 
         [FunctionName("AdminLogin")]
