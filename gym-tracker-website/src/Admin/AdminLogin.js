@@ -56,11 +56,10 @@ function AdminLogin() {
         setSuccess("Valid username and password combination.");
         response.json().then((json) => {
           const jsonData = JSON.parse(json);
-          console.log(jsonData);
           const token = jsonData.Token;
           localStorage.setItem("authToken", token);
-          
-          setTimeout(function() {
+
+          setTimeout(function () {
             navigate("/admin");
             setLoading(false);
           }, 1500);
