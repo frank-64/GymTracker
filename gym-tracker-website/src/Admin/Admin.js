@@ -24,6 +24,7 @@ function Admin() {
   const [isGymOpenInput, setIsGymClosedInput] = useState(false);
   const [updatingOpeningHours, setUpdatingOpeningHours] = useState(false);
   const [alerts, setAlerts] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const handleCheckboxChange = (event) => {
     setIsGymClosedInput(event.target.checked);
@@ -165,7 +166,10 @@ function Admin() {
     const token = localStorage.getItem("authToken");
     console.log(token);
     if (!token || tokenExpired(token)) {
+      setLoggedIn(false);
       navigate("/admin-login");
+    }else{
+      setLoggedIn(true);
     }
   }, [navigate]);
 
@@ -189,173 +193,174 @@ function Admin() {
         navigateTarget="/admin-login"
         logout={true}
       />
-      <Container fluid>
-        <Row className="subtitle-row">
-          <Col md={12} style={{ marginTop: "50px" }}>
-            <div className="subtitle">
-              <p>
-                The Gym is currently:{" "}
-                <Badge bg={gymDetails.IsOpen ? "success" : "danger"}>
-                  {gymDetails.IsOpen ? "OPEN" : "CLOSED"}
-                </Badge>
-              </p>
-            </div>
-          </Col>
-        </Row>
-        <Row style={{ marginTop: "-100px" }}>
-          <Col md={6} className="admin-column-left">
-            <div className="admin-section">
-              <div>
+      {loggedIn && (
+        <Container fluid>
+          <Row className="subtitle-row">
+            <Col md={12} style={{ marginTop: "50px" }}>
+              <div className="subtitle">
                 <p>
-                  Opening hours for{" "}
-                  <Badge>{gymDetails.GymName ? gymDetails.GymName : ""}</Badge>
+                  The Gym is currently:{" "}
+                  <Badge bg={gymDetails.IsOpen ? "success" : "danger"}>
+                    {gymDetails.IsOpen ? "OPEN" : "CLOSED"}
+                  </Badge>
                 </p>
               </div>
-              <div>
-                <Table style={{ color: "white" }}>
-                  <thead>
-                    <tr>
-                      <th>Day</th>
-                      <th>Opening Time</th>
-                      <th>Closing Time</th>
-                    </tr>
-                  </thead>
+            </Col>
+          </Row>
+          <Row style={{ marginTop: "-100px" }}>
+            <Col md={6} className="admin-column-left">
+              <div className="admin-section">
+                <div>
+                  <p>
+                    Opening hours for{" "}
+                    <Badge>{gymDetails.GymName ? gymDetails.GymName : ""}</Badge>
+                  </p>
+                </div>
+                <div>
+                  <Table style={{ color: "white" }}>
+                    <thead>
+                      <tr>
+                        <th>Day</th>
+                        <th>Opening Time</th>
+                        <th>Closing Time</th>
+                      </tr>
+                    </thead>
+                    {updatingOpeningHours ? (
+                      <tbody>
+                        {gymDetails.Hours?.map((day) => (
+                          <tr key={day.DayOfWeek}>
+                            <td>{day.DayOfWeek}</td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control"
+                                name={`StartTime-${day.DayOfWeek}`}
+                                placeholder={day.StartTime}
+                                onBlur={handleInputChange}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control"
+                                name={`EndTime-${day.DayOfWeek}`}
+                                placeholder={day.EndTime}
+                                onBlur={handleInputChange}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    ) : (
+                      <tbody>
+                        {gymDetails.Hours?.map((day) => (
+                          <tr key={day.DayOfWeek}>
+                            <td>{day.DayOfWeek}</td>
+                            <td>{day.StartTime}</td>
+                            <td>{day.EndTime}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    )}
+                  </Table>
+                </div>
+                <div className="right-panel-toggle">
                   {updatingOpeningHours ? (
-                    <tbody>
-                      {gymDetails.Hours?.map((day) => (
-                        <tr key={day.DayOfWeek}>
-                          <td>{day.DayOfWeek}</td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control"
-                              name={`StartTime-${day.DayOfWeek}`}
-                              placeholder={day.StartTime}
-                              onBlur={handleInputChange}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control"
-                              name={`EndTime-${day.DayOfWeek}`}
-                              placeholder={day.EndTime}
-                              onBlur={handleInputChange}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  ) : (
-                    <tbody>
-                      {gymDetails.Hours?.map((day) => (
-                        <tr key={day.DayOfWeek}>
-                          <td>{day.DayOfWeek}</td>
-                          <td>{day.StartTime}</td>
-                          <td>{day.EndTime}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  )}
-                </Table>
-              </div>
-              <div className="right-panel-toggle">
-                {updatingOpeningHours ? (
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <Button
-                      variant="success"
-                      style={{ marginRight: "10px" }}
-                      onClick={submitOpeningHours}
+                    <div
+                      style={{ display: "flex", justifyContent: "space-between" }}
                     >
-                      Update
+                      <Button
+                        variant="success"
+                        style={{ marginRight: "10px" }}
+                        onClick={submitOpeningHours}
+                      >
+                        Update
+                      </Button>
+                      <Button variant="danger" onClick={handleUpdateToggle}>
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button variant="success" onClick={handleUpdateToggle}>
+                      Update Standard Opening Hours
                     </Button>
-                    <Button variant="danger" onClick={handleUpdateToggle}>
-                      Cancel
+                  )}
+                </div>
+                <br />
+                <div className="gymstatus-dropdown">
+                  <p style={{ display: "inline-block", marginRight: "10px" }}>
+                    Set gym opening status:
+                  </p>
+                  <Dropdown
+                    onSelect={handleSelect}
+                    style={{ display: "inline-block" }}
+                  >
+                    <Dropdown.Toggle
+                      variant={gymDetails.IsOpen ? "success" : "danger"}
+                      id="dropdown-basic"
+                    >
+                      {gymDetails.IsOpen ? "Open" : "Closed"}
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu>
+                      <Dropdown.Item eventKey="opened">Open</Dropdown.Item>
+                      <Dropdown.Item eventKey="closed">Closed</Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </div>
+              </div>
+            </Col>
+            <Col md={6} className="admin-column-right">
+              <div className="admin-section">
+                <div className="custom-opening-hour">
+                  <div>
+                    <p>Add Closure or Set Specific Opening Hours</p>
+                  </div>
+                  <div>
+                    <Form>
+                      <Form.Group style={{ marginBottom: "20px" }}>
+                        <Form.Label>Date:</Form.Label>
+                        <Form.Control type="date" style={{ width: "50%" }} />
+                      </Form.Group>
+                      <Form.Group
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Form.Label style={{ marginRight: "10px" }}>
+                          Will the gym be open?:
+                        </Form.Label>
+                        <Form.Check
+                          inline
+                          type="checkbox"
+                          checked={isGymOpenInput}
+                          onChange={handleCheckboxChange}
+                        />
+                      </Form.Group>
+                      <Fragment>
+                        <fieldset disabled={!isGymOpenInput}>
+                          <Form.Group style={{ marginBottom: "25px" }}>
+                            <Form.Label>Start Time:</Form.Label>
+                            <Form.Control type="time" style={{ width: "50%" }} />
+                          </Form.Group>
+                          <Form.Group style={{ marginBottom: "25px" }}>
+                            <Form.Label>End Time:</Form.Label>
+                            <Form.Control type="time" style={{ width: "50%" }} />
+                          </Form.Group>
+                        </fieldset>
+                      </Fragment>
+                    </Form>
+                  </div>
+                  <div>
+                    <Button variant="success">
+                      Add
                     </Button>
                   </div>
-                ) : (
-                  <Button variant="success" onClick={handleUpdateToggle}>
-                    Update Standard Opening Hours
-                  </Button>
-                )}
-              </div>
-              <br />
-              <div className="gymstatus-dropdown">
-                <p style={{ display: "inline-block", marginRight: "10px" }}>
-                  Set gym opening status:
-                </p>
-                <Dropdown
-                  onSelect={handleSelect}
-                  style={{ display: "inline-block" }}
-                >
-                  <Dropdown.Toggle
-                    variant={gymDetails.IsOpen ? "success" : "danger"}
-                    id="dropdown-basic"
-                  >
-                    {gymDetails.IsOpen ? "Open" : "Closed"}
-                  </Dropdown.Toggle>
-
-                  <Dropdown.Menu>
-                    <Dropdown.Item eventKey="opened">Open</Dropdown.Item>
-                    <Dropdown.Item eventKey="closed">Closed</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </div>
-            </div>
-          </Col>
-          <Col md={6} className="admin-column-right">
-            <div className="admin-section">
-              <div className="custom-opening-hour">
-                <div>
-                  <p>Add Closure or Set Specific Opening Hours</p>
-                </div>
-                <div>
-                  <Form>
-                    <Form.Group style={{ marginBottom: "20px" }}>
-                      <Form.Label>Date:</Form.Label>
-                      <Form.Control type="date" style={{ width: "50%" }} />
-                    </Form.Group>
-                    <Form.Group
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Form.Label style={{ marginRight: "10px" }}>
-                        Will the gym be open?:
-                      </Form.Label>
-                      <Form.Check
-                        inline
-                        type="checkbox"
-                        checked={isGymOpenInput}
-                        onChange={handleCheckboxChange}
-                      />
-                    </Form.Group>
-                    <Fragment>
-                      <fieldset disabled={!isGymOpenInput}>
-                        <Form.Group style={{ marginBottom: "25px" }}>
-                          <Form.Label>Start Time:</Form.Label>
-                          <Form.Control type="time" style={{ width: "50%" }} />
-                        </Form.Group>
-                        <Form.Group style={{ marginBottom: "25px" }}>
-                          <Form.Label>End Time:</Form.Label>
-                          <Form.Control type="time" style={{ width: "50%" }} />
-                        </Form.Group>
-                      </fieldset>
-                    </Fragment>
-                  </Form>
-                </div>
-                <div>
-                  <Button variant="success">
-                    Add
-                  </Button>
                 </div>
               </div>
-            </div>
-          </Col>
-        </Row>
+            </Col>
+          </Row>
         {/* TODO: Come back to this as errors are hard to see */}
         <Col md={12}>
           <div id="alertContainer" className="alert-container">
@@ -374,6 +379,7 @@ function Admin() {
           </div>
         </Col>
       </Container>
+      )}
     </div>
   );
 }
