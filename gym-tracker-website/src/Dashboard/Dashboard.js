@@ -13,8 +13,12 @@ function Dashboard() {
   const [gymStatus, setGymStatus] = useState("");
   const [isOpen, setIsOpen] = useState(true);
   const [occupancy, setOccupancy] = useState("0");
-  const getGymDetailsUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
-  const getGymStatusUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
+  const [nextOpeningHour, setNextOpeningHour] = useState("6:30 AM");
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const getGymDetailsUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
+  const getGymStatusUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
 
   const [gymOccupancyConfiguration, setGymOccupancyConfiguration] = useState({
     color: "",
@@ -22,8 +26,19 @@ function Dashboard() {
   });
 
   const handleGymDetailsResponse = (gymDetailsObject) => {
-    setGymDetails(gymDetailsObject)
-  }
+    setGymDetails(gymDetailsObject);
+    determineTomorrowsOpeningHours(gymDetailsObject.OpeningHours);
+  };
+
+  const determineTomorrowsOpeningHours = (openingHours) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDayOfWeek = daysOfWeek[tomorrow.getDay()];
+    const openingHour = openingHours.find(
+      (day) => day.DayOfWeek === tomorrowDayOfWeek
+    );
+    setNextOpeningHour(openingHour.StartTime);
+  };
 
   const handleGymStatusResponse = (gymStatusObject) => {
     setGymStatus(gymStatusObject);
@@ -32,28 +47,37 @@ function Dashboard() {
     setGymOccupancyConfiguration(
       getColorAndText(gymStatusObject.CapacityPercentage)
     );
-  }
+  };
 
   const handleGymStatusFetchNotOk = () => {
     //TODO: Add alerts to dashboard
-  }
+  };
 
   const handleGymDetailsFetchNotOk = () => {
     //TODO: Add alerts to dashboard
-  }
+  };
 
   const handleError = () => {
     //TODO: Add alerts to dashboard
-  }
+  };
 
   useEffect(() => {
-    function fetchGymDetails(){
-      fetchData(getGymDetailsUrl, handleGymDetailsResponse, handleGymDetailsFetchNotOk, handleError);
+    function fetchGymDetails() {
+      fetchData(
+        getGymDetailsUrl,
+        handleGymDetailsResponse,
+        handleGymDetailsFetchNotOk,
+        handleError
+      );
     }
 
-
     function fetchGymStatus() {
-      fetchData(getGymStatusUrl, handleGymStatusResponse, handleGymStatusFetchNotOk, handleError);
+      fetchData(
+        getGymStatusUrl,
+        handleGymStatusResponse,
+        handleGymStatusFetchNotOk,
+        handleError
+      );
     }
 
     fetchGymDetails();
@@ -131,7 +155,10 @@ function Dashboard() {
                       "tomato",
                       "firebrick",
                     ]}
-                    currentValueText={gymStatus.CapacityPercentage && (`${gymStatus.CapacityPercentage}%`)}
+                    currentValueText={
+                      gymStatus.CapacityPercentage &&
+                      `${gymStatus.CapacityPercentage}%`
+                    }
                     customSegmentLabels={[
                       {
                         text: "Very Quiet",
@@ -180,7 +207,7 @@ function Dashboard() {
                 <div className="closedGym">
                   {/* TODO: SET NEXT OPEN TIME */}
                   <h2>Reopen at:</h2>
-                  <p>{"6:30am"}</p>
+                  <p>{nextOpeningHour}</p>
                   <br />
                   <p>Please see opening hours for further details.</p>
                 </div>
