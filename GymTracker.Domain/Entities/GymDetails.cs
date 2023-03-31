@@ -19,11 +19,4 @@ namespace GymTracker.Domain.Entities
 
         }
     }
-
-    public class Day
-    {
-        public string DayOfWeek { get; set; }
-        public string StartTime { get; set; }
-        public string EndTime { get; set; }
-    }
 }
