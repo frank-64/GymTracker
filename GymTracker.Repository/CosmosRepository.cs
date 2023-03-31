@@ -52,11 +52,15 @@ namespace CosmosGettingStartedTutorial
             Console.WriteLine($"Upserted item to the database consumed {response.RequestCharge} RUs.");
         }
 
-        public async Task AddGymDayTrackerToContainer(GymDayTracker gymDayTracker)
+        public async Task AddGymDayTrackerToContainerAsync(GymDayTracker gymDayTracker)
         {
             ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.CreateItemAsync(gymDayTracker, new PartitionKey(gymDayTracker.Month));
             // Output the RUs (Request Units) used, only for testing purposes
             Console.WriteLine($"Created item in database with id: {gymDayTrackerResponse.Resource.Id} Operation consumed {gymDayTrackerResponse.RequestCharge} RUs.");
+            if (gymDayTrackerResponse.StatusCode != HttpStatusCode.Created)
+            {
+                throw new Exception($"Failed to create item with id: {gymDayTracker.Id}. StatusCode: {gymDayTrackerResponse.StatusCode}");
+            }
         }
     }
 }

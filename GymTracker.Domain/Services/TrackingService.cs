@@ -32,7 +32,16 @@ namespace GymTracker.Domain.Services
             DateTimeOffset currentDate = new DateTimeOffset(currentDateTime.Year, currentDateTime.Month, currentDateTime.Day, 0, 0, 0, currentDateTime.Offset);
 
             GymDayTracker gymDayTracker = null;
-            var gymDayTrackerItemResponse = await _cosmosRepository.GetItemAsync<GymDayTracker>(stringDate, currentMonth);
+            ItemResponse<GymDayTracker> gymDayTrackerItemResponse;
+            try
+            {
+                gymDayTrackerItemResponse = await _cosmosRepository.GetItemAsync<GymDayTracker>(stringDate, currentMonth);
+            }
+            catch
+            {
+                gymDayTrackerItemResponse = null;
+            }
+
 
             if (gymDayTrackerItemResponse == null) // GymDayTracker file has not been created yet, make a new one
             {
@@ -43,7 +52,7 @@ namespace GymTracker.Domain.Services
                     IsOpen = false,
                     AdminClosedGym = false
                 };
-                await _cosmosRepository.AddGymDayTrackerToContainer(gymDayTracker); // GymDayTracker file already exists
+                await _cosmosRepository.AddGymDayTrackerToContainerAsync(gymDayTracker); // GymDayTracker file already exists
             }
             else
             {
@@ -57,7 +66,7 @@ namespace GymTracker.Domain.Services
                 return gymDayTracker;
             }
 
-            var isOpen = await _gymDetailsService.DetermineGymStatus();
+            var isOpen = await _gymDetailsService.DetermineGymStatus(gymDayTracker.OpeningHours);
             var maxOccupancy = await _gymDetailsService.GetMaximumOccupancy();
             gymDayTracker.IsOpen = isOpen;
             gymDayTracker.MaximumOccupancy = maxOccupancy;

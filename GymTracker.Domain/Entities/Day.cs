@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace GymTracker.Domain.Entities
 {
-    public class CustomOpeningHour
+    public class Day
     {
-        public DateTime Date { get; set; }
+        public string DayOfWeek { get; set; }
+        public DateTime? Date { get; set; }
         public bool IsOpen { get; set; }
-        public TimeOnly StartTime { get; set; }
-        public TimeOnly EndTime { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
     }
 }

@@ -15,9 +15,16 @@ namespace GymTracker.Domain.Entities
         public int MaximumOccupancy { get; set; }
         public DateTimeOffset CurrentDate { get; set; }
         public string DayOfWeek => CurrentDate.DayOfWeek.ToString();
+        public Day? OpeningHours { get; set; }
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
+        }
+
+        public void UpdateOpeningHours(Day? day)
+        {
+            AdminClosedGym = !day.IsOpen;
+            OpeningHours = day.IsOpen ? day : null;
         }
     }
 }

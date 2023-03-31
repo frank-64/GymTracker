@@ -91,9 +91,15 @@ namespace GymTracker.Functions
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            CustomOpeningHour customOpeningHour = JsonConvert.DeserializeObject<CustomOpeningHour>(requestBody);
+            Day customOpeningHour = JsonConvert.DeserializeObject<Day>(requestBody);
 
-            await _gymDetailsService.SetCustomOpeningPeriod(customOpeningHour);
+            try
+            {
+                await _gymDetailsService.SetCustomOpeningPeriod(customOpeningHour);
+            }catch(Exception ex)
+            {
+                return new BadRequestObjectResult(ex.Message);
+            }
             var json = JsonConvert.SerializeObject(customOpeningHour);
             return new OkObjectResult(json);
         }

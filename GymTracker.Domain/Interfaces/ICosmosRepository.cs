@@ -14,6 +14,6 @@ namespace GymTracker.Domain.Interfaces
         Task CreateContainerAsync(string containerId, string partitionKey);
         Task UpsertItemAsync<T>(T item);
         Task<ItemResponse<Item>> GetItemAsync<Item>(string id, string partitionKey);
-        Task AddGymDayTrackerToContainer(GymDayTracker gymDayTracker);
+        Task AddGymDayTrackerToContainerAsync(GymDayTracker gymDayTracker);
     }
 }
