@@ -108,8 +108,9 @@ namespace GymTracker.Domain.Services
                     Date = customOpeningHour.Date.Value,
                     DayOfWeek = customOpeningHour.Date.Value.DayOfWeek.ToString(),
                     StartTime = customOpeningHour.StartTime,
-                    EndTime = customOpeningHour.EndTime
-                    
+                    EndTime = customOpeningHour.EndTime,
+                    IsOpen = true
+               
                 };
             }
 
@@ -141,6 +142,7 @@ namespace GymTracker.Domain.Services
             }
             else
             {
+                gymDayTracker = gymDayTrackerItemResponse.Resource;
                 gymDayTracker.UpdateOpeningHours(openingHours);
                 await _cosmosRepository.UpsertItemAsync(gymDayTracker);
             }

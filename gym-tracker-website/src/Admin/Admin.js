@@ -13,7 +13,8 @@ import {
   Button,
   Card,
   Form,
-  Alert
+  Alert,
+  Spinner
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import jwtDecode from "jwt-decode";
@@ -31,6 +32,7 @@ function Admin() {
   const [dateInput, setDateInput] = useState("");
   const [startTimeInput, setStartTimeInput] = useState("");
   const [endTimeInput, setEndTimeInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
@@ -42,14 +44,20 @@ function Admin() {
   const postCustomGymOpeningPeriodURL = "https://gym-tracker-functions.azurewebsites.net/api/setCustomOpeningPeriod?";
 
   const handleStartTimeInputChange = (e) => {
+    setError(null);
+    setSuccess(null);
     setStartTimeInput(e.target.value);
   };
 
   const handleEndTimeInputChange = (e) => {
+    setError(null);
+    setSuccess(null);
     setEndTimeInput(e.target.value);
   };
 
   const handleDateInputChange = (e) => {
+    setError(null);
+    setSuccess(null);
     setDateInput(e.target.value);
   };
 
@@ -63,6 +71,9 @@ function Admin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
 
     // Form validation
     if(dateInput === ""){
@@ -156,6 +167,7 @@ function Admin() {
   }
 
   const handleCustomOpeningPostNotOk = () => {
+    setLoading(null);
     setError("An issue occurred when adding the closure or setting a specific opening hour.");
   }
 
@@ -171,11 +183,12 @@ function Admin() {
     console.error(error);
   }
 
-  const handleOk = (json) => {
+  const handleResponse = () => {
 
   }
 
-  const handleCustomOpeningOk = (json) => {
+  const handleCustomOpeningResponse = () => {
+    setLoading(false);
     setSuccess("Your update has been made successfully.");
   }
 
@@ -186,18 +199,18 @@ function Admin() {
   function postCustomGymOpeningPeriod(customOpeningPeriod) {
     console.log(customOpeningPeriod);
     var body = JSON.stringify(customOpeningPeriod);
-    postData(postCustomGymOpeningPeriodURL, body, handleCustomOpeningOk, handleCustomOpeningPostNotOk, handleError);
+    postData(postCustomGymOpeningPeriodURL, body, handleCustomOpeningResponse, handleCustomOpeningPostNotOk, handleError);
   }
 
 
   function postGymDetails(updatedGymDetails) {
     var body = JSON.stringify(updatedGymDetails);
-    postData(postGymDetailsUrl, body, handleOk, handleGymDetailsPostNotOk, handleError);
+    postData(postGymDetailsUrl, body, handleResponse, handleGymDetailsPostNotOk, handleError);
   }
 
   function postGymStatus(updatedGymStatus) {
     var body = JSON.stringify(updatedGymStatus);
-    postData(postGymStatusUrl, body, handleOk, handleGymStatusPostNotOk, handleError);
+    postData(postGymStatusUrl, body, handleResponse, handleGymStatusPostNotOk, handleError);
   }
 
   useEffect(() => {
@@ -424,7 +437,13 @@ function Admin() {
                               </fieldset>
                             </Fragment>
                             <div className="form-button">
-                              <Button variant="success" type="submit">Add Closure/Opening Hour Update</Button>
+                              {loading ? (
+                                <Spinner animation="border" variant="primary" />
+                              ) : (
+                                <Button variant="success" type="submit">
+                                  Add Closure or Opening Hour Update
+                                </Button>
+                              )}
                             </div>
                           </Form>
                         </Card.Body>
