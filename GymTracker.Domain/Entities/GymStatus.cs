@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace GymTracker.Domain.Entities
 {
     public class GymStatus
@@ -13,18 +8,20 @@ namespace GymTracker.Domain.Entities
         public double CapacityPercentage => OccupancyValue > 0 ? OccupancyValue * 100 / MaxOccupancy : 0;
         public bool IsOpen { get; set; }
         public bool AdminClosedGym { get; set; }
+        public Day? CustomOpeningHours { get; set; }
 
         public GymStatus()
         {
 
         }
 
-        public GymStatus(int occupancyValue, int maxOccupancy, bool isOpen, bool adminClosedGym)
+        public GymStatus(int occupancyValue, int maxOccupancy, bool isOpen, bool adminClosedGym, Day customOpeningHours)
         {
             OccupancyValue = occupancyValue;
             MaxOccupancy = maxOccupancy;
             IsOpen = isOpen;
             AdminClosedGym = adminClosedGym;
+            CustomOpeningHours = customOpeningHours != null ? customOpeningHours : null;
         }
     }
 }

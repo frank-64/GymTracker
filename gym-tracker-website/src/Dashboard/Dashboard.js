@@ -14,7 +14,15 @@ function Dashboard() {
   const [isOpen, setIsOpen] = useState(true);
   const [occupancy, setOccupancy] = useState("0");
   const [nextOpeningHour, setNextOpeningHour] = useState("6:30 AM");
-  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
   const getGymDetailsUrl =
     "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
   const getGymStatusUrl =
@@ -129,8 +137,19 @@ function Dashboard() {
                     {gymDetails.OpeningHours?.map((day) => (
                       <tr key={day.DayOfWeek}>
                         <td>{day.DayOfWeek}</td>
-                        <td>{day.StartTime}</td>
-                        <td>{day.EndTime}</td>
+                        {/* Displaying the custom hours set for the day if they have been set by the admin */}
+                        {day.DayOfWeek ===
+                        gymStatus.CustomOpeningHours.DayOfWeek ? (
+                          <>
+                            <td>{gymStatus.CustomOpeningHours.StartTime}</td>
+                            <td>{gymStatus.CustomOpeningHours.EndTime}</td>
+                          </>
+                        ) : (
+                          <>
+                            <td>{day.StartTime}</td>
+                            <td>{day.EndTime}</td>
+                          </>
+                        )}
                       </tr>
                     ))}
                   </tbody>

@@ -136,7 +136,7 @@ namespace GymTracker.Domain.Services
                     CurrentDate = customOpeningHour.Date.Value,
                     IsOpen = customOpeningHour.IsOpen,
                     AdminClosedGym = !customOpeningHour.IsOpen,
-                    OpeningHours = customOpeningHour.IsOpen ? openingHours : null
+                    CustomOpeningHours = customOpeningHour.IsOpen ? openingHours : null
                 };
                 await _cosmosRepository.AddGymDayTrackerToContainerAsync(gymDayTracker);
             }

@@ -85,12 +85,14 @@ function Admin() {
         if((startTimeInput !== "" && endTimeInput !== "")){
           if(endTimeInput < startTimeInput){
             setError("End time must not be before start time.");
+            setLoading(false);
           }else{
             setError(null);
             postCustomGymOpeningPeriod({Date: dateInput, IsOpen: isGymOpenInput, StartTime: startTimeInput, EndTime: endTimeInput});
           }
         }else{
           setError("Opening times not specified.");
+          setLoading(false);
         }
       }else{ // Closure on a specific date so no need for start/end time validation
         setError(null);
@@ -189,7 +191,7 @@ function Admin() {
 
   const handleCustomOpeningResponse = () => {
     setLoading(false);
-    setSuccess("Your update has been made successfully.");
+    setSuccess("Your update was successful.");
   }
 
   const handleNotOk = () => {

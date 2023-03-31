@@ -66,7 +66,7 @@ namespace GymTracker.Domain.Services
                 return gymDayTracker;
             }
 
-            var isOpen = await _gymDetailsService.DetermineGymStatus(gymDayTracker.OpeningHours);
+            var isOpen = await _gymDetailsService.DetermineGymStatus(gymDayTracker.CustomOpeningHours);
             var maxOccupancy = await _gymDetailsService.GetMaximumOccupancy();
             gymDayTracker.IsOpen = isOpen;
             gymDayTracker.MaximumOccupancy = maxOccupancy;
@@ -78,7 +78,7 @@ namespace GymTracker.Domain.Services
             GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
 
             // Return the occupancy of gym, whether it's currently open and if the admin manually closed it
-            GymStatus gymStatus = new GymStatus(gymDayTracker.CurrentGymOccupancy, gymDayTracker.MaximumOccupancy, gymDayTracker.IsOpen, gymDayTracker.AdminClosedGym);
+            GymStatus gymStatus = new GymStatus(gymDayTracker.CurrentGymOccupancy, gymDayTracker.MaximumOccupancy, gymDayTracker.IsOpen, gymDayTracker.AdminClosedGym, gymDayTracker.CustomOpeningHours != null ? gymDayTracker.CustomOpeningHours : null);
             return gymStatus;
         }
 
