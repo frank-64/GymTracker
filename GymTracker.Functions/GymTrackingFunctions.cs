@@ -83,6 +83,21 @@ namespace GymTracker.Functions
             return new OkObjectResult(json);
         }
 
+        [FunctionName("SetCustomOpeningPeriod")]
+        public async Task<IActionResult> SetCustomOpeningPeriod(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "setCustomOpeningPeriod")] HttpRequest req,
+        ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            CustomOpeningHour customOpeningHour = JsonConvert.DeserializeObject<CustomOpeningHour>(requestBody);
+
+            await _gymDetailsService.SetCustomOpeningPeriod(customOpeningHour);
+            var json = JsonConvert.SerializeObject(customOpeningHour);
+            return new OkObjectResult(json);
+        }
+
         [FunctionName("AdminLogin")]
         public async Task<IActionResult> AdminLogin(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "determineAdminLogin")] HttpRequest req,

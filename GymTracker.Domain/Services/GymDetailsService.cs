@@ -69,9 +69,27 @@ namespace GymTracker.Domain.Services
         {
             await _cosmosRepository.CreateDatabaseAsync(adminDatabaseId);
             await _cosmosRepository.CreateContainerAsync(adminContainerId, "/id");
+            
+            // Get the hashed password secret from blob storage
             Secret secret = await _cosmosRepository.GetItemAsync<Secret>(credentials.Username, credentials.Username);
+
+            // Determine if the password entered by the user matches the hashed password
             var validPassword = BCrypt.Net.BCrypt.Verify(credentials.Password, secret.HashedPassword);
             return validPassword;
+        }
+
+        public Task SetCustomOpeningPeriod(CustomOpeningHour customOpeningHour)
+        {
+            string currentMonth = customOpeningHour.Date.Month.ToString();
+            string stringDate = DateOnly.FromDateTime(customOpeningHour.Date).ToString("dd-MM-yyyy");
+            GymDayTracker gymDayTracker = new GymDayTracker()
+            {
+                Id = stringDate,
+                Month = currentMonth,
+                CurrentDate = customOpeningHour.Date,
+                IsOpen = customOpeningHour.IsOpen
+                // TODO: Determine where to store start and end if gym is open
+            };
         }
     }
 }
