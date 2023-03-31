@@ -76,7 +76,7 @@ function Admin() {
             setError("End time must not be before start time.");
           }else{
             setError(null);
-            postCustomGymOpeningPeriod({Date: dateInput, IsGymOpen: isGymOpenInput, StartTime: startTimeInput, EndTime: endTimeInput});
+            postCustomGymOpeningPeriod({Date: dateInput, IsOpen: isGymOpenInput, StartTime: startTimeInput, EndTime: endTimeInput});
           }
         }else{
           setError("Opening times not specified.");
@@ -84,7 +84,7 @@ function Admin() {
       }else{ // Closure on a specific date so no need for start/end time validation
         setError(null);
         setSuccess("Your update has been made.");
-        postCustomGymOpeningPeriod({Date: dateInput, IsGymOpen: isGymOpenInput});
+        postCustomGymOpeningPeriod({Date: dateInput, IsOpen: isGymOpenInput});
       }
     }
   }
@@ -151,6 +151,7 @@ function Admin() {
   }
 
   const handleGymStatusResponse = (response) => {
+    console.log(response);
     setGymStatus(response);
   }
 
@@ -183,8 +184,9 @@ function Admin() {
   }
 
   function postCustomGymOpeningPeriod(customOpeningPeriod) {
+    console.log(customOpeningPeriod);
     var body = JSON.stringify(customOpeningPeriod);
-    postData(postGymDetailsUrl, body, handleCustomOpeningOk, handleCustomOpeningPostNotOk, handleError);
+    postData(postCustomGymOpeningPeriodURL, body, handleCustomOpeningOk, handleCustomOpeningPostNotOk, handleError);
   }
 
 
@@ -207,8 +209,8 @@ function Admin() {
       fetchData(getGymStatusUrl, handleGymStatusResponse, handleNotOk, handleError);
     }
 
-  fetchGymStatus();
   fetchGymDetails();
+  fetchGymStatus();
   }, []);
 
   // Redirect the user back to the login page if they no longer have a token or it has expired

@@ -48,17 +48,15 @@ namespace GymTracker.Domain.Services
 
                 startTime = DateTime.Parse(day.StartTime);
                 endTime = DateTime.Parse(day.EndTime);
-
-                // Return true indiciating the gym is open if the current time falls in the start/end opening period set for the current day
-                return DateTime.Now.TimeOfDay >= startTime.TimeOfDay && DateTime.Now.TimeOfDay <= endTime.TimeOfDay;
             }
             else // An admin has set custom opening hours for today so use those values instead to determine if the gym is open as of execution
             {
                 startTime = DateTime.Parse(customOpeningHours.StartTime);
                 endTime = DateTime.Parse(customOpeningHours.EndTime);
-
-                return DateTime.Now.TimeOfDay >= startTime.TimeOfDay && DateTime.Now.TimeOfDay <= endTime.TimeOfDay;
             }
+
+            // Return true or false depending if current time falls in the start/end opening period for the current day
+            return DateTime.Now.TimeOfDay >= startTime.TimeOfDay && DateTime.Now.TimeOfDay <= endTime.TimeOfDay;
         }
 
         public async Task<int> GetMaximumOccupancy()
