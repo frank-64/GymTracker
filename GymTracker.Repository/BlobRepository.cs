@@ -11,8 +11,8 @@ namespace GymTracker.Repository
         private readonly string containerName;
         public BlobRepository()
         {
-            connectionString = Environment.GetEnvironmentVariable("GymDetailsBlobConnStr");
-            containerName = Environment.GetEnvironmentVariable("gym-container");
+            connectionString = Environment.GetEnvironmentVariable("blobContainerConnStr");
+            containerName = Environment.GetEnvironmentVariable("blobContainerName");
         }
 
         public async Task UploadBlobAsync<T>(T objectToUpload, string blobName)
