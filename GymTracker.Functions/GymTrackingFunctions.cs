@@ -70,19 +70,19 @@ namespace GymTracker.Functions
             }
         }
 
-        [FunctionName("UpdateOverallGymInsights")]
-        public async Task UpdateOverallGymInsights([TimerTrigger("0 30 23 * * *")] TimerInfo myTimer, ILogger log) // This will run at 11:30pm each day
-        {
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-            await _trackingService.UpdateOverallGymInsightsAsync();
-        }
+        //[FunctionName("UpdateOverallGymInsights")]
+        //public async Task UpdateOverallGymInsights([TimerTrigger("0 30 23 * * *")] TimerInfo myTimer, ILogger log) // This will run at 11:30pm each day
+        //{
+        //    log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+        //    await _trackingService.UpdateOverallGymInsightsAsync();
+        //}
 
-        [FunctionName("UpdateDailyGymInsights")]
-        public async Task UpdateDailyGymInsights([TimerTrigger("0 0 * * * *")] TimerInfo myTimer, ILogger log) // This will run every hour on the hour.
-        {
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-            await _trackingService.UpdateHourlyGymInsightsAsync();
-        }
+        //[FunctionName("UpdateDailyGymInsights")]
+        //public async Task UpdateDailyGymInsights([TimerTrigger("0 0 * * * *")] TimerInfo myTimer, ILogger log) // This will run every hour on the hour.
+        //{
+        //    log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+        //    await _trackingService.UpdateHourlyGymInsightsAsync();
+        //}
 
         [FunctionName("InfluxOccurrence")]
         public async Task<IActionResult> InfluxOccurrence(
