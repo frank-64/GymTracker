@@ -8,13 +8,13 @@ namespace GymTracker.Domain.Entities
 {
     public class PeakOccupancyDTO
     {
-        public string Name { get; set; }
-        public double Occupancy { get; set; }
+        public string name { get; set; }
+        public double occupancy { get; set; }
 
         public PeakOccupancyDTO(string name, double occupancy)
         {
-            Name = name;
-            Occupancy = occupancy;
+            name = name;
+            occupancy = occupancy;
         }
     }
 }

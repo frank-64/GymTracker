@@ -6,16 +6,7 @@ import { useState, useEffect } from "react";
 import { Col, Container, Row, Table, Badge } from "react-bootstrap";
 import { getColorAndText } from "../Helper/helper";
 import { fetchData } from "../Helper/helper";
-import {
-  BarChart,
-  ResponsiveContainer,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
+import { BarChart, ResponsiveContainer, Bar, XAxis, YAxis, Legend } from "recharts";
 
 function Insights() {
   const [isOpen, setIsOpen] = useState(true);
@@ -25,31 +16,31 @@ function Insights() {
 
   const data = [
     {
-      name: 'Page A',
+      name: "Page A",
       uv: 4000,
     },
     {
-      name: 'Page B',
+      name: "Page B",
       uv: 3000,
     },
     {
-      name: 'Page C',
+      name: "Page C",
       uv: 2000,
     },
     {
-      name: 'Page D',
+      name: "Page D",
       uv: 2780,
     },
     {
-      name: 'Page E',
+      name: "Page E",
       uv: 1890,
     },
     {
-      name: 'Page F',
+      name: "Page F",
       uv: 2390,
     },
     {
-      name: 'Page G',
+      name: "Page G",
       uv: 3490,
     },
   ];
@@ -65,6 +56,7 @@ function Insights() {
 
   const handleGymInsightsResponse = (gymInsightsObject) => {
     setDayOfWeek(gymInsightsObject.DayOfWeek);
+    console.log(gymInsightsObject);
 
     setDailyPeakOccupancyData(gymInsightsObject.AverageDailyPeakOccupancy);
     setHourlyPeakOccupancyData(gymInsightsObject.AverageHourlyPeakOccupancy);
@@ -124,7 +116,7 @@ function Insights() {
           </Col>
         </Row>
         <Row>
-          <Col md={6} style={{marginTop: "50px"}}>
+          <Col md={6} style={{ marginTop: "50px" }}>
             <ResponsiveContainer width="100%" height="30%">
               <BarChart
                 width={500}
@@ -165,9 +157,7 @@ function Insights() {
             </ResponsiveContainer>
           </Col>
           <Col md={6}>
-            <div className="insights-section">
-
-            </div>
+            <div className="insights-section"></div>
           </Col>
         </Row>
       </Container>
