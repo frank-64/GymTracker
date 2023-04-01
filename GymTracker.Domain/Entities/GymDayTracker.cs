@@ -11,7 +11,6 @@ namespace GymTracker.Domain.Entities
         public bool IsOpen { get; set; } = false;
         public bool AdminClosedGym { get; set; } = false;
         public int CurrentGymOccupancy { get; set; }
-        public int HighestGymOccupancy { get; set; }
         public int MaximumOccupancy { get; set; }
         public DateTimeOffset CurrentDate { get; set; }
         public string DayOfWeek => CurrentDate.DayOfWeek.ToString();

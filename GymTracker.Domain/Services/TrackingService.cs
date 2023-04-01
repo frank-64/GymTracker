@@ -121,16 +121,25 @@ namespace GymTracker.Domain.Services
 						string hour = entry.Key;
 						int occupancy = entry.Value;
 
-						//// If the hour doesn't exist in the hourlyTotals dictionary, add it with a value of 0
-						//if (!hourlyTotals.ContainsKey(hour))
-						//{
-						//    hourlyTotals.Add(hour, 0);
-						//    hourlyCounts.Add(hour, 0);
-						//}
+                        //// If the hour doesn't exist in the hourlyTotals dictionary, add it with a value of 0
+                        //if (!hourlyTotals.ContainsKey(hour))
+                        //{
+                        //    hourlyTotals.Add(hour, 0);
+                        //    hourlyCounts.Add(hour, 0);
+                        //}
 
-						// Add the current occupancy to the hourly total and increment the hourly count
-						hourlyTotals[hour] += occupancy;
-						hourlyCounts[hour]++;
+                        // Add the current occupancy to the hourly total and increment the hourly count
+                        try
+                        {
+							hourlyTotals[hour] += occupancy;
+							hourlyCounts[hour]++;
+                        }
+                        catch
+                        {
+							// Adding new hour to dictionaries
+							hourlyTotals.Add(hour, occupancy);
+							hourlyCounts.Add(hour, 1);
+                        }
 					}
 				}
 			}
@@ -151,21 +160,6 @@ namespace GymTracker.Domain.Services
 
 			return new GymInsightsDTO { DayOfWeek= currentDayOfWeek, AverageDailyPeakOccupancy = dailyPeakOccupancyAverages, AverageHourlyPeakOccupancy = hourlyPeakOccupancyAverages};
 		}
-		public async Task UpdateOverallGymInsightsAsync()
-		{
-			GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
-			List<GymInsights> gymInsights = await _blobRepository.GetBlob<List<GymInsights>>(blobName);
-
-			DateTime now = DateTime.Now;
-			GymInsights todaysInsights = gymInsights.Where(i => i.Date == now.Date).Single();
-			if (todaysInsights.Date == null) // Gym might've been closed all day.
-			{
-				return;
-			}
-			todaysInsights.UpdateDailyInsights(gymDayTracker.HighestGymOccupancy);
-
-			await _blobRepository.UploadBlobAsync(gymInsights, blobName);
-		}
 
 		public async Task UpdateHourlyGymInsightsAsync()
 		{
@@ -176,22 +170,24 @@ namespace GymTracker.Domain.Services
 			}
 
 			DateTime now = DateTime.Now;
-			now = now.AddHours(-1); // Go back one hour to display the max occupancy recorded during this hour
-			var stringTime = now.ToString("h:mm tt");
+			// Go back one hour to display the max occupancy recorded during the previous hour
+			DateTime nowWithoutMinutes = new DateTime(now.Year, now.Month, now.Day, now.Hour-1, 0, 0);
+			var stringTime = nowWithoutMinutes.ToString("h:mm tt");
 
 			List<GymInsights> gymInsights = await _blobRepository.GetBlob<List<GymInsights>>(blobName);
-			GymInsights todaysInsights = gymInsights.Where(i => i.Date == now.Date).Single();
+			GymInsights todaysInsights = gymInsights.FirstOrDefault(i => i.Date == now.Date);
 
-			if (todaysInsights != null) 
+			if (todaysInsights != null)
 			{
 				// Existing insights object so append new hourly insight to it
-				todaysInsights.UpdateHourlyInsights(now.Date, stringTime, gymDayTracker.CurrentGymOccupancy);
+				gymInsights.Where(i => i.Date == now.Date).Single().UpdateHourlyInsights(now.Date, stringTime, gymDayTracker.CurrentGymOccupancy);
 			}
 			else
 			{
 				// Gym has just opened so create today's a new insight object
 				todaysInsights = new GymInsights(); 
 				todaysInsights.UpdateHourlyInsights(now.Date, stringTime, gymDayTracker.CurrentGymOccupancy);
+				gymInsights.Add(todaysInsights);
 			}
 
 			await _blobRepository.UploadBlobAsync(gymInsights, blobName);
@@ -218,33 +214,18 @@ namespace GymTracker.Domain.Services
 		{
 			GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
 
-			gymDayTracker.CurrentGymOccupancy += amount;
+			// Increment the current occupancy with a limit of the max occupancy value
+			gymDayTracker.CurrentGymOccupancy = gymDayTracker.CurrentGymOccupancy + amount > gymDayTracker.MaximumOccupancy ? gymDayTracker.MaximumOccupancy : gymDayTracker.CurrentGymOccupancy + amount;
 
-			if (!(gymDayTracker.CurrentGymOccupancy >= gymDayTracker.MaximumOccupancy))
-			{
-				// Set highest occupancy if more than current highest occupancy
-				if (gymDayTracker.CurrentGymOccupancy > gymDayTracker.HighestGymOccupancy)
-				{
-					gymDayTracker.HighestGymOccupancy = gymDayTracker.CurrentGymOccupancy;
-				}
-
-				//Update item
-				await _cosmosRepository.UpsertItemAsync(gymDayTracker);
-			}
+			await _cosmosRepository.UpsertItemAsync(gymDayTracker);
 		}
 
 		public async Task DecrementCountAsync(int amount)
 		{
 			GymDayTracker gymDayTracker = await GetGymDayTrackerAsync();
 
-			if (gymDayTracker.CurrentGymOccupancy - amount >= 0)
-			{
-				gymDayTracker.CurrentGymOccupancy -= amount;
-			}
-			else
-			{
-				gymDayTracker.CurrentGymOccupancy = 0;
-			}
+			// Decrement the current occupancy count with a floor limit of 0
+			gymDayTracker.CurrentGymOccupancy = gymDayTracker.CurrentGymOccupancy - amount >= 0 ? gymDayTracker.CurrentGymOccupancy - amount : 0;
 
 			await _cosmosRepository.UpsertItemAsync(gymDayTracker);
 		}

@@ -10,12 +10,11 @@ namespace GymTracker.Domain.Entities
     {
         public string DayOfWeek { get; set; }
         public DateTime Date { get; set; }
-        public int MaxOccupancyReached { get; set; }
+        public int MaxOccupancyReached => HourlyPeakOccupancy.Any() ? HourlyPeakOccupancy.Values.Max() : 0;
         public Dictionary<string, int> HourlyPeakOccupancy { get; set; }
 
-        public void UpdateDailyInsights(int maxOccupancyReached)
-        {
-            MaxOccupancyReached = maxOccupancyReached;
+        public GymInsights() { 
+            HourlyPeakOccupancy = new Dictionary<string, int>();
         }
 
         public void UpdateHourlyInsights(DateTime date, string stringTime, int currentOccupancy)
