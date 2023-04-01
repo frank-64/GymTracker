@@ -11,10 +11,10 @@ namespace GymTracker.Domain.Entities
         public string name { get; set; }
         public double occupancy { get; set; }
 
-        public PeakOccupancyDTO(string nameParam, double occupancyParam)
+        public PeakOccupancyDTO(string nameParam, double occupancyParam, int maxOccupancy)
         {
             name = nameParam;
-            occupancy = occupancyParam;
+            occupancy = occupancyParam > 0 ? occupancyParam * 100 / maxOccupancy : 0;
         }
     }
 }

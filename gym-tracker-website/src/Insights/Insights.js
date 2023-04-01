@@ -6,45 +6,13 @@ import { useState, useEffect } from "react";
 import { Col, Container, Row, Table, Badge } from "react-bootstrap";
 import { getColorAndText } from "../Helper/helper";
 import { fetchData } from "../Helper/helper";
-import { BarChart, ResponsiveContainer, Bar, XAxis, YAxis, Legend } from "recharts";
+import { BarChart, ResponsiveContainer, Bar, XAxis, YAxis, Label } from "recharts";
 
 function Insights() {
   const [isOpen, setIsOpen] = useState(true);
   const [dayOfWeek, setDayOfWeek] = useState("");
   const [dailyPeakOccupancyData, setDailyPeakOccupancyData] = useState("");
   const [hourlyPeakOccupancyData, setHourlyPeakOccupancyData] = useState("");
-
-  const data = [
-    {
-      name: "Page A",
-      uv: 4000,
-    },
-    {
-      name: "Page B",
-      uv: 3000,
-    },
-    {
-      name: "Page C",
-      uv: 2000,
-    },
-    {
-      name: "Page D",
-      uv: 2780,
-    },
-    {
-      name: "Page E",
-      uv: 1890,
-    },
-    {
-      name: "Page F",
-      uv: 2390,
-    },
-    {
-      name: "Page G",
-      uv: 3490,
-    },
-  ];
-
   const getGymStatusUrl =
     "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
   const getGymInsightsUrl =
@@ -117,42 +85,59 @@ function Insights() {
         </Row>
         <Row>
           <Col md={6} style={{ marginTop: "50px" }}>
-            <ResponsiveContainer width="100%" height="30%">
+            <ResponsiveContainer width="100%" height="35%">
               <BarChart
                 width={500}
                 height={200}
-                data={data}
+                data={dailyPeakOccupancyData}
                 margin={{
                   top: 5,
                   right: 30,
                   left: 20,
-                  bottom: 5,
+                  bottom: 0,
                 }}
               >
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Legend />
-                <Bar dataKey="pv" fill="#8884d8" />
-                <Bar dataKey="uv" fill="#82ca9d" />
+                <XAxis dataKey="name" tick={{fill: 'white', fontSize: "small"}} />
+                <YAxis tick={{fill: 'white', fontSize: "large"}}>
+                  <Label
+                    value="Capacity %"
+                    position="insideLeft"
+                    angle={-90}
+                    style={{ textAnchor: 'middle', fill: '#fff', fontWeight:'bold' }}
+                  />
+                </YAxis>
+                <Bar dataKey="occupancy" fill="#8884d8" />
+                <text x="50%" y="12" textAnchor="middle" fontWeight="bold" fontSize={16} fill='white'>
+                  Daily peak occupancy
+                </text>
               </BarChart>
             </ResponsiveContainer>
-            <ResponsiveContainer width="100%" height="30%">
+            <div style={{ height: "50px" }}></div>
+            <ResponsiveContainer width="100%" height="35%">
               <BarChart
                 width={500}
                 height={200}
-                data={data}
+                data={hourlyPeakOccupancyData}
                 margin={{
                   top: 5,
                   right: 30,
                   left: 20,
-                  bottom: 5,
+                  bottom: 0,
                 }}
               >
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Legend />
-                <Bar dataKey="pv" fill="#8884d8" />
-                <Bar dataKey="uv" fill="#82ca9d" />
+                <XAxis dataKey="name" tick={{fill: 'white'}} interval={2} />
+                <YAxis tick={{fill: 'white', fontSize: "medium"}}>
+                  <Label
+                    value="Capacity %"
+                    position="insideLeft"
+                    angle={-90}
+                    style={{ textAnchor: 'middle', fill: '#fff', fontWeight:'bold' }}
+                  />
+                </YAxis>
+                <Bar dataKey="occupancy" fill="#82ca9d" />
+                <text x="50%" y="12" textAnchor="middle" fontWeight="bold" fontSize={16} fill='white'>
+                  Hourly occupancy for {dayOfWeek}
+                </text>
               </BarChart>
             </ResponsiveContainer>
           </Col>

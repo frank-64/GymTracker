@@ -143,10 +143,23 @@ function Dashboard() {
                         {gymStatus.CustomOpeningHours ? (
                           day.DayOfWeek ===
                           gymStatus.CustomOpeningHours.DayOfWeek ? (
-                            <>
-                              <td>{gymStatus.CustomOpeningHours.StartTime}</td>
-                              <td>{gymStatus.CustomOpeningHours.EndTime}</td>
-                            </>
+                            gymStatus.CustomOpeningHours.StartTime ? (
+                              <>
+                                <td>
+                                  {gymStatus.CustomOpeningHours.StartTime}
+                                </td>
+                                <td>{gymStatus.CustomOpeningHours.EndTime}</td>
+                              </>
+                            ) : (
+                              <>
+                                <td>
+                                  <Badge bg={"danger"}>CLOSED</Badge>
+                                </td>
+                                <td>
+                                  <Badge bg={"danger"}>CLOSED</Badge>
+                                </td>
+                              </>
+                            )
                           ) : (
                             <>
                               <td>{day.StartTime}</td>
@@ -235,8 +248,9 @@ function Dashboard() {
               ) : (
                 <div className="closedGym">
                   {/* TODO: SET NEXT OPEN TIME */}
-                  <h2>Reopen at:</h2>
-                  <p>{nextOpeningHour}</p>
+                  <p>
+                    Reopen at <Badge bg={"success"}>{nextOpeningHour}</Badge>
+                  </p>
                   <br />
                   <p>Please see opening hours for further details.</p>
                 </div>

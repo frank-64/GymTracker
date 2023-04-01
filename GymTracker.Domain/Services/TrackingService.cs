@@ -82,6 +82,7 @@ namespace GymTracker.Domain.Services
 
 		public async Task<GymInsightsDTO> GetGymInsightsAsync()
 		{
+			var maxOccupancy = await _gymDetailsService.GetMaximumOccupancy();
 			// Get the current day of the week
 			string currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
 			List<GymInsights> gymInsights = await _blobRepository.GetBlob<List<GymInsights>>(blobName);
@@ -92,8 +93,10 @@ namespace GymTracker.Domain.Services
 			List<PeakOccupancyDTO> dailyPeakOccupancyAverages = new List<PeakOccupancyDTO>();
 
 			// Iterating over each day of the week
-			foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+			foreach (DaysOfTheWeek day in Enum.GetValues(typeof(DaysOfTheWeek)))
 			{
+				string dayShorthand = day.ToString() == "Thursday" ? "Thurs" : day.ToString().Substring(0, 3);
+
 				// Filter insights for the current day of the week
 				var insightsForDay = gymInsights.Where(i => i.DayOfWeek == day.ToString());
 
@@ -101,7 +104,7 @@ namespace GymTracker.Domain.Services
 				double averageMaxOccupancy = insightsForDay.Average(i => i.MaxOccupancyReached);
 
 				// Store the average in the dictionary
-				dailyPeakOccupancyAverages.Add(new PeakOccupancyDTO(day.ToString(), averageMaxOccupancy));
+				dailyPeakOccupancyAverages.Add(new PeakOccupancyDTO(day.ToString(), averageMaxOccupancy, maxOccupancy));
 			}
 
 			// Hours
@@ -152,7 +155,7 @@ namespace GymTracker.Domain.Services
 				int count = hourlyCounts[hour];
 
 				double averageOccupancy = (double)totalOccupancy / count;
-				hourlyPeakOccupancyAverages.Add(new PeakOccupancyDTO(hour, averageOccupancy));
+				hourlyPeakOccupancyAverages.Add(new PeakOccupancyDTO(hour, averageOccupancy, maxOccupancy));
 			}
 
 			// TODO: Append current equipment availability to gym insights as that is based on current occupancy in the gym vs total equipment and depmand for each equipment
