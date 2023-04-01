@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace GymTracker.Domain
 {
-    public interface IAzureRepository
+    public interface IBlobRepository
     {
-        public Task UploadBlobAsync(Stream stream, string blobName);
+        public Task UploadBlobAsync<T>(T objectToUpload, string blobName);
         public Task<bool> CheckIfBlobExists(string blobPath);
-        public Task<Stream> GetBlob(string blobName);
+        public Task<T> GetBlob<T>(string blobName);
     }
 }

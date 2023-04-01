@@ -18,7 +18,7 @@ namespace GymTracker.Functions
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddScoped<IAzureRepository, AzureRepository>();
+            builder.Services.AddScoped<IBlobRepository, BlobRepository>();
             builder.Services.AddScoped<ITrackingService, TrackingService>();
             builder.Services.AddScoped<IGymDetailsService, GymDetailsService>();
             builder.Services.AddScoped<ICosmosRepository, CosmosRepository>();
