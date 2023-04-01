@@ -3,6 +3,7 @@ using GymTracker.Domain.Interfaces;
 using System.Text;
 using Newtonsoft.Json;
 using Microsoft.Azure.Cosmos;
+using System.Globalization;
 
 namespace GymTracker.Domain.Services
 {
@@ -107,10 +108,9 @@ namespace GymTracker.Domain.Services
                 {
                     Date = customOpeningHour.Date.Value,
                     DayOfWeek = customOpeningHour.Date.Value.DayOfWeek.ToString(),
-                    StartTime = customOpeningHour.StartTime,
-                    EndTime = customOpeningHour.EndTime,
+                    StartTime = customOpeningHour.StartTime != null ? DateTime.ParseExact(customOpeningHour.StartTime, "HH:mm", CultureInfo.InvariantCulture).ToString("h:mm tt") : null,
+                    EndTime = customOpeningHour.EndTime != null ? DateTime.ParseExact(customOpeningHour.EndTime, "HH:mm", CultureInfo.InvariantCulture).ToString("h:mm tt") : null,
                     IsOpen = true
-               
                 };
             }
 

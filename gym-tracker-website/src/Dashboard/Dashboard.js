@@ -134,17 +134,24 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
+                    {console.log(gymDetails.OpeningHours)}
+                    {console.log(gymStatus)}
                     {gymDetails.OpeningHours?.map((day) => (
                       <tr key={day.DayOfWeek}>
                         <td>{day.DayOfWeek}</td>
                         {/* Displaying the custom hours set for the day if they have been set by the admin */}
-                        {day.DayOfWeek ===
+                        {gymStatus.CustomOpeningHours ? (day.DayOfWeek ===
                         gymStatus.CustomOpeningHours.DayOfWeek ? (
                           <>
                             <td>{gymStatus.CustomOpeningHours.StartTime}</td>
                             <td>{gymStatus.CustomOpeningHours.EndTime}</td>
                           </>
                         ) : (
+                          <>
+                            <td>{day.StartTime}</td>
+                            <td>{day.EndTime}</td>
+                          </>
+                        )) : (
                           <>
                             <td>{day.StartTime}</td>
                             <td>{day.EndTime}</td>
@@ -175,8 +182,8 @@ function Dashboard() {
                       "firebrick",
                     ]}
                     currentValueText={
-                      gymStatus.CapacityPercentage &&
-                      `${gymStatus.CapacityPercentage}%`
+                      gymStatus.CapacityPercentage ?
+                      `${gymStatus.CapacityPercentage}%` : ""
                     }
                     customSegmentLabels={[
                       {
