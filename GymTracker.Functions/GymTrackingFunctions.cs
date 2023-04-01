@@ -193,19 +193,53 @@ namespace GymTracker.Functions
             return new OkObjectResult(responseMessage);
         }
 
-        [FunctionName("OccupancyEvent")]
-        public async Task<IActionResult> OccupancyEvent(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "occupancyEvent")] HttpRequest req,
+        [FunctionName("GymEntryEvent")]
+        public async Task<IActionResult> GymEntryEvent(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "gymEntryEvent")] HttpRequest req,
         ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
+            log.LogInformation("C# HTTP trigger function processed a Kisi WebHook request for a GymEntryEvent");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             log.LogInformation(requestBody);
-            log.LogInformation($"Event occurred with body: {data}");
+            log.LogInformation($"Entry event occurred with body: {data}");
 
-            return new OkObjectResult(data);
+            // TODO: Do logging on the event to ensure idempotency!
+
+            log.LogInformation($"A person has left the gym. Attempting to update overall occupancy.");
+            try
+            {
+                await _trackingService.IncrementCountAsync(1);
+            }
+            catch
+            {
+                log.LogError("An error occurred handling a gym entry event triggered by the Kisi WebHook.");
+            }
+            return new OkObjectResult("Occupancy was successfully updated to record 1 person entering the gym.");
+        }
+
+        [FunctionName("GymExitEvent")]
+        public async Task<IActionResult> GymExitEvent(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "gymExitEvent")] HttpRequest req,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a Kisi WebHook request for a GymExitEvent");
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            log.LogInformation(requestBody);
+            log.LogInformation($"Exit event occurred with body: {data}");
+
+            // TODO: Do logging on the event to ensure idempotency!
+
+            log.LogInformation($"A person has left the gym. Attempting to update overall occupancy.");
+            try
+            {
+                await _trackingService.DecrementCountAsync(1);
+            }catch
+            {
+                log.LogError("An error occurred handling a gym exit event triggered by the Kisi WebHook.");
+            }
+            return new OkObjectResult("Occupancy was successfully updated to record 1 person leaving the gym.");
         }
     }
 }
