@@ -61,8 +61,7 @@ namespace GymTracker.Functions
             try
             {
                 GymInsightsDTO gymInsights = await _trackingService.GetGymInsightsAsync();
-                var json = JsonConvert.SerializeObject(gymInsights);
-                return new OkObjectResult(json);
+                return new OkObjectResult(gymInsights);
             }
             catch (Exception ex)
             {

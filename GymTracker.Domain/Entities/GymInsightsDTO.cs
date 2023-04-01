@@ -8,8 +8,8 @@ namespace GymTracker.Domain.Entities
 {
     public class GymInsightsDTO
     {
-        public Dictionary<string, double> AverageDailyPeakOccupancy { get; set; }
+        public List<PeakOccupancyDTO> AverageDailyPeakOccupancy { get; set; }
         public string DayOfWeek { get; set; } // Day of the week for the average hourly peak occupancy
-        public Dictionary<string, double> AverageHourlyPeakOccupancy { get; set; }
+        public List<PeakOccupancyDTO> AverageHourlyPeakOccupancy { get; set; }
     }
 }

@@ -89,7 +89,7 @@ namespace GymTracker.Domain.Services
 			// Put them into DTO object ready to be displayed in the frontend
 
 			// Days
-			Dictionary<string, double> dailyPeakOccupancyAverages = new Dictionary<string, double>();
+			List<PeakOccupancyDTO> dailyPeakOccupancyAverages = new List<PeakOccupancyDTO>();
 
 			// Iterating over each day of the week
 			foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
@@ -101,13 +101,13 @@ namespace GymTracker.Domain.Services
 				double averageMaxOccupancy = insightsForDay.Average(i => i.MaxOccupancyReached);
 
 				// Store the average in the dictionary
-				dailyPeakOccupancyAverages.Add(day.ToString(), averageMaxOccupancy);
+				dailyPeakOccupancyAverages.Add(new PeakOccupancyDTO(day.ToString(), averageMaxOccupancy));
 			}
 
 			// Hours
 			Dictionary<string, int> hourlyTotals = new Dictionary<string, int>();
 			Dictionary<string, int> hourlyCounts = new Dictionary<string, int>();
-			Dictionary<string, double> hourlyPeakOccupancyAverages = new Dictionary<string, double>();
+			List<PeakOccupancyDTO> hourlyPeakOccupancyAverages = new List<PeakOccupancyDTO>();
 
 			// Iterate over each GymInsights object in the list
 			foreach (GymInsights insights in gymInsights)
@@ -152,7 +152,7 @@ namespace GymTracker.Domain.Services
 				int count = hourlyCounts[hour];
 
 				double averageOccupancy = (double)totalOccupancy / count;
-				hourlyPeakOccupancyAverages.Add(hour, averageOccupancy);
+				hourlyPeakOccupancyAverages.Add(new PeakOccupancyDTO(hour, averageOccupancy));
 			}
 
 			// TODO: Append current equipment availability to gym insights as that is based on current occupancy in the gym vs total equipment and depmand for each equipment
