@@ -12,6 +12,9 @@ namespace GymTracker.Domain.Interfaces
         public Task IncrementCountAsync(int amount);
         public Task DecrementCountAsync(int amount);
         public Task<GymStatus> GetGymStatusAsync();
+        public Task<GymInsightsDTO> GetGymInsightsAsync();
+        public Task UpdateOverallGymInsightsAsync();
+        public Task UpdateHourlyGymInsightsAsync();
         public Task UpdateGymStatusAsync(GymStatus gymStatus);
         public Task<GymDayTracker> GetGymDayTrackerAsync();
     }

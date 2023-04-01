@@ -14,12 +14,12 @@ namespace GymTracker.Domain.Services
         private readonly string adminContainerId;
         private readonly string trackingDatabaseId;
         private readonly string trackingContainerId;
-        private readonly IAzureRepository _azureRepository;
+        private readonly IBlobRepository _blobRepository;
         private readonly ICosmosRepository _cosmosRepository;
 
-        public GymDetailsService(IAzureRepository azureRepository, ICosmosRepository cosmosRepository)
+        public GymDetailsService(IBlobRepository azureRepository, ICosmosRepository cosmosRepository)
         {
-            _azureRepository = azureRepository;
+            _blobRepository = azureRepository;
             _cosmosRepository = cosmosRepository;
             blobName = Environment.GetEnvironmentVariable("gymDetailsBlobName");
             adminDatabaseId = Environment.GetEnvironmentVariable("adminDatabaseId");
@@ -30,10 +30,8 @@ namespace GymTracker.Domain.Services
 
         public async Task<GymDetails> GetGymDetails()
         {
-            using Stream stream = await _azureRepository.GetBlob(blobName);
-            using StreamReader reader = new StreamReader(stream);
-            return JsonConvert.DeserializeObject<GymDetails>(await reader.ReadToEndAsync());
-        }
+            return await _blobRepository.GetBlob<GymDetails>(blobName);
+}
 
         public async Task<bool> DetermineGymStatus(Day customOpeningHours)
         {
@@ -70,11 +68,7 @@ namespace GymTracker.Domain.Services
 
         public async Task UpdateGymDetails(GymDetails updatedGymDetails)
         {
-            string json = JsonConvert.SerializeObject(updatedGymDetails);
-            byte[] byteArray = Encoding.UTF8.GetBytes(json);
-            MemoryStream stream = new MemoryStream(byteArray);
-
-            await _azureRepository.UploadBlobAsync(stream, blobName);
+            await _blobRepository.UploadBlobAsync(updatedGymDetails, blobName);
         }
 
         public async Task<bool> AdminLogin(Credentials credentials)

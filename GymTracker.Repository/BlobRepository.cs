@@ -1,19 +1,26 @@
 ﻿using Azure.Storage.Blobs;
 using GymTracker.Domain;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace GymTracker.Repository
 {
-    public class AzureRepository : IAzureRepository
+    public class BlobRepository : IBlobRepository
     {
         private readonly string connectionString;
-        private readonly string containerName = "gym-details";
-        public AzureRepository()
+        private readonly string containerName;
+        public BlobRepository()
         {
             connectionString = Environment.GetEnvironmentVariable("GymDetailsBlobConnStr");
+            containerName = Environment.GetEnvironmentVariable("gym-container");
         }
 
-        public async Task UploadBlobAsync(Stream stream, string blobName)
+        public async Task UploadBlobAsync<T>(T objectToUpload, string blobName)
         {
+            string json = JsonConvert.SerializeObject(objectToUpload);
+            byte[] byteArray = Encoding.UTF8.GetBytes(json);
+            MemoryStream stream = new MemoryStream(byteArray);
+
             var containerClient = new BlobContainerClient(connectionString, containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
             await blobClient.UploadAsync(stream, overwrite: true);
@@ -26,11 +33,14 @@ namespace GymTracker.Repository
             return await blobClient.ExistsAsync();
         }
 
-        public async Task<Stream> GetBlob(string blobName)
+        public async Task<T> GetBlob<T>(string blobName)
         {
             var containerClient = new BlobContainerClient(connectionString, containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
-            return await blobClient.OpenReadAsync();
+
+            using Stream stream = await blobClient.OpenReadAsync();
+            using StreamReader reader = new StreamReader(stream);
+            return JsonConvert.DeserializeObject<T>(await reader.ReadToEndAsync());
         }
     }
 }
