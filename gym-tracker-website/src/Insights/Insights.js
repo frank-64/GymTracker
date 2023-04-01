@@ -66,9 +66,7 @@ function Insights() {
   const handleGymInsightsResponse = (gymInsightsObject) => {
     setDayOfWeek(gymInsightsObject.DayOfWeek);
 
-    setDailyPeakOccupancyData(gymInsightsObject.AverageDailyPeakOccupancy.map((m) => {
-      {name: m.}
-    }));
+    setDailyPeakOccupancyData(gymInsightsObject.AverageDailyPeakOccupancy);
     setHourlyPeakOccupancyData(gymInsightsObject.AverageHourlyPeakOccupancy);
   };
 
