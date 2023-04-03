@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using GymTracker.Domain.Interfaces;
 using GymTracker.Domain.Entities;
+using Azure.Storage.Queues;
 
 namespace GymTracker.Functions
 {
@@ -70,6 +71,22 @@ namespace GymTracker.Functions
             }
         }
 
+        [FunctionName("ExpireGymEntryValue")]
+        public async Task ExpireGymEntryValue([QueueTrigger("gym-occupancy", Connection = "storageAccountConnStr")] string myQueueItem, ILogger log)
+        {
+            log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
+
+            log.LogInformation($"A person has left the gym. Attempting to update overall occupancy.");
+            try
+            {
+                await _trackingService.DecrementCountAsync(1);
+            }
+            catch
+            {
+                log.LogError("An error occurred reducing the occupancy count");
+            }
+        }
+
         //TODO: Uncomment when entry/exit events are setup
         //[FunctionName("UpdateDailyGymInsights")]
         //public async Task UpdateDailyGymInsights([TimerTrigger("0 0 * * * *")] TimerInfo myTimer, ILogger log) // This will run every hour on the hour.
@@ -78,54 +95,9 @@ namespace GymTracker.Functions
         //    await _trackingService.UpdateHourlyGymInsightsAsync();
         //}
 
-        [FunctionName("InfluxOccurrence")]
-        public async Task<IActionResult> InfluxOccurrence(
-           [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "influxOccurance")] HttpRequest req,
-           ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-            string influxAmount = req.Query["amount"];
-
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            influxAmount = influxAmount ?? data?.amount;
-
-            log.LogInformation($"An influx of {influxAmount} person(s) has entered the gym. Attempting to update overall occupancy.");
-            await _trackingService.IncrementCountAsync(int.Parse(influxAmount));
-
-            string responseMessage = string.IsNullOrEmpty(influxAmount)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"An influx of {influxAmount} person(s) entering the gym was recorded successfully.";
-
-            return new OkObjectResult(responseMessage);
-        }
-
-        [FunctionName("OutflowOccurrence")]
-        public async Task<IActionResult> OutflowOccurrence(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "outflowOccurance")] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-            string outflowAmount = req.Query["amount"];
-
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            outflowAmount = outflowAmount ?? data?.amount;
-
-            log.LogInformation($"An outflow of {outflowAmount} person(s) has left the gym. Attempting to update overall occupancy.");
-            await _trackingService.DecrementCountAsync(int.Parse(outflowAmount));
-
-            string responseMessage = string.IsNullOrEmpty(outflowAmount)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"An outflow of {outflowAmount} person(s) leaving the gym was recorded successfully.";
-
-            return new OkObjectResult(responseMessage);
-        }
-
         [FunctionName("GymEntryEvent")]
         public async Task<IActionResult> GymEntryEvent(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "gymEntryEvent")] HttpRequest req,
-        ILogger log)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "gymEntryEvent")] HttpRequest req, ILogger log, [Queue("gym-occupancy", Connection = "storageAccountConnStr")] QueueClient gymOccupancyQueue)
         {
             log.LogInformation("C# HTTP trigger function processed a Kisi WebHook request for a GymEntryEvent");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -139,6 +111,7 @@ namespace GymTracker.Functions
             try
             {
                 await _trackingService.IncrementCountAsync(1);
+                await gymOccupancyQueue.SendMessageAsync(DateTime.Now.ToString(), visibilityTimeout: TimeSpan.FromMinutes(45));
             }
             catch
             {
@@ -169,6 +142,50 @@ namespace GymTracker.Functions
                 log.LogError("An error occurred handling a gym exit event triggered by the Kisi WebHook.");
             }
             return new OkObjectResult("Occupancy was successfully updated to record 1 person leaving the gym.");
+        }
+
+        [FunctionName("InfluxOccurrence")]
+        public async Task<IActionResult> InfluxOccurrence(
+       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "influxOccurance")] HttpRequest req,
+       ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+            string influxAmount = req.Query["amount"];
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            influxAmount = influxAmount ?? data?.amount;
+
+            log.LogInformation($"An influx of {influxAmount} person(s) has entered the gym. Attempting to update overall occupancy.");
+            await _trackingService.IncrementCountAsync(int.Parse(influxAmount));
+
+            string responseMessage = string.IsNullOrEmpty(influxAmount)
+                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
+                : $"An influx of {influxAmount} person(s) entering the gym was recorded successfully.";
+
+            return new OkObjectResult(responseMessage);
+        }
+
+        [FunctionName("OutflowOccurrence")]
+        public async Task<IActionResult> OutflowOccurrence(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "outflowOccurance")] HttpRequest req,
+        ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+            string outflowAmount = req.Query["amount"];
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            outflowAmount = outflowAmount ?? data?.amount;
+
+            log.LogInformation($"An outflow of {outflowAmount} person(s) has left the gym. Attempting to update overall occupancy.");
+            await _trackingService.DecrementCountAsync(int.Parse(outflowAmount));
+
+            string responseMessage = string.IsNullOrEmpty(outflowAmount)
+                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
+                : $"An outflow of {outflowAmount} person(s) leaving the gym was recorded successfully.";
+
+            return new OkObjectResult(responseMessage);
         }
     }
 }
