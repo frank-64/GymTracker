@@ -1,6 +1,5 @@
 .insights {
   background-color: #282c34;
-  text-align: center;
 }
 
 .insights-section {
@@ -8,19 +7,46 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  text-align: center;
   align-items: center;
   font-size: calc(10px + 2vmin);
   color: white;
-  padding-top: 60px;
 }
 
 .equipment-usage-list {
-  padding-top: 20px;
   list-style-type: none;
   font-weight: 700;
 }
 
-li{
-  margin: 10px 0;
+.usage-list {
+  padding-top: 0;
+  padding-right: 30px;
+  list-style-type: none;
+  font-weight: 500;
+  font-size: small;
+  text-align: left !important;
+}
+
+.usage-key {
+  list-style-type: none;
+}
+
+li {
   font-size: x-large;
+}
+
+.card-body {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.key-card {
+  background-color: #282c34 !important;
+  border: 2px solid white !important;
+  min-width: 350px;
+  max-width: 375px;
+}
+
+.usage-column {
+  text-align: -webkit-center;
 }
