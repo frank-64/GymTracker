@@ -104,7 +104,7 @@ namespace GymTracker.Domain.Services
 				double averageMaxOccupancy = insightsForDay.Average(i => i.MaxOccupancyReached);
 
 				// Store the average in the dictionary
-				dailyPeakOccupancyAverages.Add(new PeakOccupancyDTO(day.ToString(), averageMaxOccupancy, maxOccupancy));
+				dailyPeakOccupancyAverages.Add(new PeakOccupancyDTO(dayShorthand, averageMaxOccupancy, maxOccupancy));
 			}
 
 			// Hours
