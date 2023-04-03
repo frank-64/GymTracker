@@ -3,16 +3,24 @@ import Navbar from "../Components/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect } from "react";
-import { Col, Container, Row, Table, Badge } from "react-bootstrap";
+import { Col, Container, Row, Badge } from "react-bootstrap";
 import { getColorAndText } from "../Helper/helper";
 import { fetchData } from "../Helper/helper";
-import { BarChart, ResponsiveContainer, Bar, XAxis, YAxis, Label } from "recharts";
+import {
+  BarChart,
+  ResponsiveContainer,
+  Bar,
+  XAxis,
+  YAxis,
+  Label,
+} from "recharts";
 
 function Insights() {
   const [isOpen, setIsOpen] = useState(true);
   const [dayOfWeek, setDayOfWeek] = useState("");
   const [dailyPeakOccupancyData, setDailyPeakOccupancyData] = useState("");
   const [hourlyPeakOccupancyData, setHourlyPeakOccupancyData] = useState("");
+  const [equipmentUsage, setEquipmentUsage] = useState("");
   const getGymStatusUrl =
     "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
   const getGymInsightsUrl =
@@ -24,10 +32,10 @@ function Insights() {
 
   const handleGymInsightsResponse = (gymInsightsObject) => {
     setDayOfWeek(gymInsightsObject.DayOfWeek);
-    console.log(gymInsightsObject);
 
     setDailyPeakOccupancyData(gymInsightsObject.AverageDailyPeakOccupancy);
     setHourlyPeakOccupancyData(gymInsightsObject.AverageHourlyPeakOccupancy);
+    setEquipmentUsage(gymInsightsObject.)
   };
 
   const handleGymStatusFetchNotOk = () => {
@@ -97,17 +105,31 @@ function Insights() {
                   bottom: 0,
                 }}
               >
-                <XAxis dataKey="name" tick={{fill: 'white', fontSize: "small"}} />
-                <YAxis tick={{fill: 'white', fontSize: "large"}}>
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: "white", fontSize: "small" }}
+                />
+                <YAxis tick={{ fill: "white", fontSize: "large" }}>
                   <Label
                     value="Capacity %"
                     position="insideLeft"
                     angle={-90}
-                    style={{ textAnchor: 'middle', fill: '#fff', fontWeight:'bold' }}
+                    style={{
+                      textAnchor: "middle",
+                      fill: "#fff",
+                      fontWeight: "bold",
+                    }}
                   />
                 </YAxis>
                 <Bar dataKey="occupancy" fill="#8884d8" />
-                <text x="50%" y="12" textAnchor="middle" fontWeight="bold" fontSize={16} fill='white'>
+                <text
+                  x="50%"
+                  y="12"
+                  textAnchor="middle"
+                  fontWeight="bold"
+                  fontSize={16}
+                  fill="white"
+                >
                   Daily peak occupancy
                 </text>
               </BarChart>
@@ -125,24 +147,43 @@ function Insights() {
                   bottom: 0,
                 }}
               >
-                <XAxis dataKey="name" tick={{fill: 'white'}} interval={2} />
-                <YAxis tick={{fill: 'white', fontSize: "medium"}}>
+                <XAxis dataKey="name" tick={{ fill: "white" }} interval={2} />
+                <YAxis tick={{ fill: "white", fontSize: "medium" }}>
                   <Label
                     value="Capacity %"
                     position="insideLeft"
                     angle={-90}
-                    style={{ textAnchor: 'middle', fill: '#fff', fontWeight:'bold' }}
+                    style={{
+                      textAnchor: "middle",
+                      fill: "#fff",
+                      fontWeight: "bold",
+                    }}
                   />
                 </YAxis>
                 <Bar dataKey="occupancy" fill="#82ca9d" />
-                <text x="50%" y="12" textAnchor="middle" fontWeight="bold" fontSize={16} fill='white'>
+                <text
+                  x="50%"
+                  y="12"
+                  textAnchor="middle"
+                  fontWeight="bold"
+                  fontSize={16}
+                  fill="white"
+                >
                   Hourly occupancy for {dayOfWeek}
                 </text>
               </BarChart>
             </ResponsiveContainer>
           </Col>
           <Col md={6}>
-            <div className="insights-section"></div>
+            <div className="insights-section">
+              <p>
+                Equipment Usage{" "}
+                <FontAwesomeIcon
+                  icon={faDumbbell}
+                  style={{ marginLeft: "10px" }}
+                />
+              </p>
+            </div>
           </Col>
         </Row>
       </Container>

@@ -13,6 +13,7 @@ namespace GymTracker.Domain.Entities
         public string PhoneNumber { get; set; }
         public int MaxOccupancy { get; set; } = 100;
         public List<Day> OpeningHours { get; set; }
+        public List<Equipment> Equipment { get; set; }
 
         public GymDetails()
         {

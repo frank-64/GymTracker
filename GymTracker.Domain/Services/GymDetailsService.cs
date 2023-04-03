@@ -68,7 +68,9 @@ namespace GymTracker.Domain.Services
 
         public async Task UpdateGymDetails(GymDetails updatedGymDetails)
         {
-            await _blobRepository.UploadBlobAsync(updatedGymDetails, blobName);
+            var currentGymDetails = await GetGymDetails();
+            currentGymDetails.OpeningHours = updatedGymDetails.OpeningHours;
+            await _blobRepository.UploadBlobAsync(currentGymDetails, blobName);
         }
 
         public async Task<bool> AdminLogin(Credentials credentials)
