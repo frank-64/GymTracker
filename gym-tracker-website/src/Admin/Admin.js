@@ -14,7 +14,7 @@ import {
   Card,
   Form,
   Alert,
-  Spinner
+  Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import jwtDecode from "jwt-decode";
@@ -37,11 +37,16 @@ function Admin() {
   const [success, setSuccess] = useState(null);
 
   // API URLs
-  const getGymDetailsUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
-  const getGymStatusUrl = "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
-  const postGymDetailsUrl = "https://gym-tracker-functions.azurewebsites.net/api/updateGymDetails?";
-  const postGymStatusUrl = "https://gym-tracker-functions.azurewebsites.net/api/updateGymStatus?";
-  const postCustomGymOpeningPeriodURL = "https://gym-tracker-functions.azurewebsites.net/api/setCustomOpeningPeriod?";
+  const getGymDetailsUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
+  const getGymStatusUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
+  const postGymDetailsUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/updateGymDetails?";
+  const postGymStatusUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/updateGymStatus?";
+  const postCustomGymOpeningPeriodURL =
+    "https://gym-tracker-functions.azurewebsites.net/api/setCustomOpeningPeriod?";
 
   const handleStartTimeInputChange = (e) => {
     setError(null);
@@ -63,7 +68,7 @@ function Admin() {
 
   const handleCheckboxChange = (event) => {
     setIsGymClosedInput(event.target.checked);
-    if(isGymOpenInput){
+    if (isGymOpenInput) {
       setStartTimeInput("");
       setEndTimeInput("");
     }
@@ -76,31 +81,37 @@ function Admin() {
     setSuccess(null);
 
     // Form validation
-    if(dateInput === ""){
+    if (dateInput === "") {
       setError("You must enter a date!");
-    }else{
-      if(isGymOpenInput){
+    } else {
+      if (isGymOpenInput) {
         // Updated opening hours on a specific day
         // Need to ensure the values are set and the end time is not before the start time
-        if((startTimeInput !== "" && endTimeInput !== "")){
-          if(endTimeInput < startTimeInput){
+        if (startTimeInput !== "" && endTimeInput !== "") {
+          if (endTimeInput < startTimeInput) {
             setError("End time must not be before start time.");
             setLoading(false);
-          }else{
+          } else {
             setError(null);
-            postCustomGymOpeningPeriod({Date: dateInput, IsOpen: isGymOpenInput, StartTime: startTimeInput, EndTime: endTimeInput});
+            postCustomGymOpeningPeriod({
+              Date: dateInput,
+              IsOpen: isGymOpenInput,
+              StartTime: startTimeInput,
+              EndTime: endTimeInput,
+            });
           }
-        }else{
+        } else {
           setError("Opening times not specified.");
           setLoading(false);
         }
-      }else{ // Closure on a specific date so no need for start/end time validation
+      } else {
+        // Closure on a specific date so no need for start/end time validation
         setError(null);
         setSuccess("Your update has been made.");
-        postCustomGymOpeningPeriod({Date: dateInput, IsOpen: isGymOpenInput});
+        postCustomGymOpeningPeriod({ Date: dateInput, IsOpen: isGymOpenInput });
       }
     }
-  }
+  };
 
   const handleSelect = (eventKey) => {
     const updatedGymStatus = { ...gymStatus };
@@ -157,75 +168,95 @@ function Admin() {
     updatedGymDetails.OpeningHours = updatedOpeningHours;
     setGymDetails(updatedGymDetails);
   };
-  
 
   const handleGymDetailsResponse = (response) => {
     setGymDetails(response);
-  }
+  };
 
   const handleGymStatusResponse = (response) => {
     console.log(response);
     setGymStatus(response);
-  }
+  };
 
   const handleCustomOpeningPostNotOk = () => {
     setLoading(null);
-    setError("An issue occurred when adding the closure or setting a specific opening hour.");
-  }
+    setError(
+      "An issue occurred when adding the closure or setting a specific opening hour."
+    );
+  };
 
-  const handleGymDetailsPostNotOk = () => {
+  const handleGymDetailsPostNotOk = () => {};
 
-  }
-
-  const handleGymStatusPostNotOk = () => {
-
-  }
+  const handleGymStatusPostNotOk = () => {};
 
   const handleError = (error) => {
     console.error(error);
-  }
+  };
 
-  const handleResponse = () => {
-
-  }
+  const handleResponse = () => {};
 
   const handleCustomOpeningResponse = () => {
     setLoading(false);
     setSuccess("Your update was successful.");
-  }
+  };
 
-  const handleNotOk = () => {
-
-  }
+  const handleNotOk = () => {};
 
   function postCustomGymOpeningPeriod(customOpeningPeriod) {
     console.log(customOpeningPeriod);
     var body = JSON.stringify(customOpeningPeriod);
-    postData(postCustomGymOpeningPeriodURL, body, handleCustomOpeningResponse, handleCustomOpeningPostNotOk, handleError);
+    postData(
+      postCustomGymOpeningPeriodURL,
+      body,
+      handleCustomOpeningResponse,
+      handleCustomOpeningPostNotOk,
+      handleError
+    );
   }
-
 
   function postGymDetails(updatedGymDetails) {
     var body = JSON.stringify(updatedGymDetails);
-    postData(postGymDetailsUrl, body, handleResponse, handleGymDetailsPostNotOk, handleError);
+    postData(
+      postGymDetailsUrl,
+      body,
+      handleResponse,
+      handleGymDetailsPostNotOk,
+      handleError
+    );
   }
 
   function postGymStatus(updatedGymStatus) {
     var body = JSON.stringify(updatedGymStatus);
-    postData(postGymStatusUrl, body, handleResponse, handleGymStatusPostNotOk, handleError);
+    postData(
+      postGymStatusUrl,
+      body,
+      handleResponse,
+      handleGymStatusPostNotOk,
+      handleError
+    );
   }
 
   useEffect(() => {
     function fetchGymDetails() {
-      fetchData(getGymDetailsUrl, handleGymDetailsResponse, handleNotOk, handleError);
+      fetchData(
+        getGymDetailsUrl,
+        handleGymDetailsResponse,
+        handleNotOk,
+        handleError
+      );
     }
 
     function fetchGymStatus() {
-      fetchData(getGymStatusUrl, handleGymStatusResponse, handleNotOk, handleError);
+      fetchData(
+        getGymStatusUrl,
+        handleGymStatusResponse,
+        handleNotOk,
+        handleError
+      );
     }
 
-  fetchGymDetails();
-  fetchGymStatus();
+    fetchGymDetails();
+    fetchGymStatus();
   }, []);
 
   // Redirect the user back to the login page if they no longer have a token or it has expired
@@ -386,70 +417,72 @@ function Admin() {
                 <div className="custom-opening-hour">
                   <div>
                     <Card className="custom-opening-hour-card">
-                      <Card.Title>Add Closure or Specific Opening Hours</Card.Title>
-                        <Card.Body>
-                          {error && <Alert variant="danger">{error}</Alert>}
-                          {success && !error && (
-                            <Alert variant="success">{success}</Alert>
-                          )}
-                          <Form onSubmit={handleSubmit}>
-                            <Form.Group style={{ marginBottom: "20px" }}>
-                              <Form.Label>Date:</Form.Label>
-                              <Form.Control 
-                                type="date"
-                                value={dateInput}
-                                onChange={handleDateInputChange}
-                                required
-                              />
-                            </Form.Group>
-                            <Form.Group
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                              }}
-                            >
-                              <Form.Label style={{ marginRight: "10px" }}>
-                                Will the gym be open?:
-                              </Form.Label>
-                              <Form.Check
-                                inline
-                                type="checkbox"
-                                checked={isGymOpenInput}
-                                onChange={handleCheckboxChange}
-                              />
-                            </Form.Group>
-                            <Fragment>
-                              <fieldset disabled={!isGymOpenInput}>
-                                <Form.Group style={{ marginBottom: "25px" }}>
-                                  <Form.Label>Start time:</Form.Label>
-                                  <Form.Control
-                                    value={startTimeInput}
-                                    onChange={handleStartTimeInputChange}
-                                    type="time"
-                                  />
-                                </Form.Group>
-                                <Form.Group style={{ marginBottom: "25px" }}>
-                                  <Form.Label>End time:</Form.Label>
-                                  <Form.Control
-                                    value={endTimeInput}
-                                    onChange={handleEndTimeInputChange}
-                                    type="time"
-                                  />
-                                </Form.Group>
-                              </fieldset>
-                            </Fragment>
-                            <div className="form-button">
-                              {loading ? (
-                                <Spinner animation="border" variant="primary" />
-                              ) : (
-                                <Button variant="success" type="submit">
-                                  Add Closure or Opening Hour Update
-                                </Button>
-                              )}
-                            </div>
-                          </Form>
-                        </Card.Body>
-                      </Card>
+                      <Card.Title>
+                        Add Closure or Specific Opening Hours
+                      </Card.Title>
+                      <Card.Body>
+                        {error && <Alert variant="danger">{error}</Alert>}
+                        {success && !error && (
+                          <Alert variant="success">{success}</Alert>
+                        )}
+                        <Form onSubmit={handleSubmit}>
+                          <Form.Group style={{ marginBottom: "20px" }}>
+                            <Form.Label>Date:</Form.Label>
+                            <Form.Control
+                              type="date"
+                              value={dateInput}
+                              onChange={handleDateInputChange}
+                              required
+                            />
+                          </Form.Group>
+                          <Form.Group
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Form.Label style={{ marginRight: "10px" }}>
+                              Will the gym be open?:
+                            </Form.Label>
+                            <Form.Check
+                              inline
+                              type="checkbox"
+                              checked={isGymOpenInput}
+                              onChange={handleCheckboxChange}
+                            />
+                          </Form.Group>
+                          <Fragment>
+                            <fieldset disabled={!isGymOpenInput}>
+                              <Form.Group style={{ marginBottom: "25px" }}>
+                                <Form.Label>Start time:</Form.Label>
+                                <Form.Control
+                                  value={startTimeInput}
+                                  onChange={handleStartTimeInputChange}
+                                  type="time"
+                                />
+                              </Form.Group>
+                              <Form.Group style={{ marginBottom: "25px" }}>
+                                <Form.Label>End time:</Form.Label>
+                                <Form.Control
+                                  value={endTimeInput}
+                                  onChange={handleEndTimeInputChange}
+                                  type="time"
+                                />
+                              </Form.Group>
+                            </fieldset>
+                          </Fragment>
+                          <div className="form-button">
+                            {loading ? (
+                              <Spinner animation="border" variant="primary" />
+                            ) : (
+                              <Button variant="success" type="submit">
+                                Add Closure or Opening Hour Update
+                              </Button>
+                            )}
+                          </div>
+                        </Form>
+                      </Card.Body>
+                    </Card>
                   </div>
                 </div>
               </div>

@@ -35,7 +35,7 @@ function Insights() {
 
     setDailyPeakOccupancyData(gymInsightsObject.AverageDailyPeakOccupancy);
     setHourlyPeakOccupancyData(gymInsightsObject.AverageHourlyPeakOccupancy);
-    setEquipmentUsage(gymInsightsObject.)
+    setEquipmentUsage(gymInsightsObject.EquipmentUsage);
   };
 
   const handleGymStatusFetchNotOk = () => {
@@ -176,13 +176,20 @@ function Insights() {
           </Col>
           <Col md={6}>
             <div className="insights-section">
-              <p>
-                Equipment Usage{" "}
+              <h3>
+                Equipment Usage Estimates{" "}
                 <FontAwesomeIcon
                   icon={faDumbbell}
                   style={{ marginLeft: "10px" }}
                 />
-              </p>
+              </h3>
+              <ul className="equipment-usage-list">
+                {equipmentUsage && equipmentUsage.map((equipment) => (
+                  <li style={{color: getColorAndText(equipment.UsagePercentage).color}}>
+                    {equipment.Name}: {equipment.UsagePercentage}%
+                  </li>
+                ))}
+              </ul>
             </div>
           </Col>
         </Row>

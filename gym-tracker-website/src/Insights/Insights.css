@@ -1,6 +1,6 @@
 .insights {
-  text-align: center;
   background-color: #282c34;
+  text-align: center;
 }
 
 .insights-section {
@@ -9,7 +9,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  padding-top: 60px;
+}
+
+.equipment-usage-list {
+  padding-top: 20px;
+  list-style-type: none;
+  font-weight: 700;
+}
+
+li{
+  margin: 10px 0;
+  font-size: x-large;
 }
