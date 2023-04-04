@@ -11,7 +11,7 @@ namespace GymTracker.Repository
         private readonly string containerName;
         public BlobRepository()
         {
-            connectionString = Environment.GetEnvironmentVariable("blobContainerConnStr");
+            connectionString = Environment.GetEnvironmentVariable("storageAccountConnStr");
             containerName = Environment.GetEnvironmentVariable("blobContainerName");
         }
 

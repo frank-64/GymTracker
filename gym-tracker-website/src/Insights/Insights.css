@@ -1,5 +1,4 @@
 .insights {
-  text-align: center;
   background-color: #282c34;
 }
 
@@ -8,8 +7,46 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  text-align: center;
   align-items: center;
-  justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+}
+
+.equipment-usage-list {
+  list-style-type: none;
+  font-weight: 700;
+}
+
+.usage-list {
+  padding-top: 0;
+  padding-right: 30px;
+  list-style-type: none;
+  font-weight: 500;
+  font-size: small;
+  text-align: left !important;
+}
+
+.usage-key {
+  list-style-type: none;
+}
+
+li {
+  font-size: x-large;
+}
+
+.card-body {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.key-card {
+  background-color: #282c34 !important;
+  border: 2px solid white !important;
+  min-width: 350px;
+  max-width: 375px;
+}
+
+.usage-column {
+  text-align: -webkit-center;
 }
