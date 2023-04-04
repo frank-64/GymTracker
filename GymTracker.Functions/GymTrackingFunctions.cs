@@ -97,7 +97,7 @@ namespace GymTracker.Functions
 
         [FunctionName("GymEntryEvent")]
         public async Task<IActionResult> GymEntryEvent(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "gymEntryEvent")] HttpRequest req, ILogger log, [Queue("gym-occupancy", Connection = "storageAccountConnStr")] QueueClient gymOccupancyQueue)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "gymEntryEvent")] HttpRequest req, ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a Kisi WebHook request for a GymEntryEvent");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -111,7 +111,7 @@ namespace GymTracker.Functions
             try
             {
                 await _trackingService.IncrementCountAsync(1);
-                await gymOccupancyQueue.SendMessageAsync(DateTime.Now.ToString(), visibilityTimeout: TimeSpan.FromMinutes(45));
+                //await gymOccupancyQueue.SendMessageAsync(DateTime.Now.ToString(), visibilityTimeout: TimeSpan.FromMinutes(45));
             }
             catch
             {
