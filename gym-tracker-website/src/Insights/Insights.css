@@ -35,7 +35,7 @@ li {
   font-size: x-large;
 }
 
-.card-body {
+.usage-column .card-body {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }

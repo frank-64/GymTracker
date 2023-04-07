@@ -19,12 +19,10 @@ namespace GymTracker.Functions
 {
     public class GymDetailsFunctions
     {
-        private readonly ITrackingService _trackingService;
         private readonly IGymDetailsService _gymDetailsService;
 
-        public GymDetailsFunctions(ITrackingService trackingService, IGymDetailsService gymDetailsService)
+        public GymDetailsFunctions(IGymDetailsService gymDetailsService)
         {
-            _trackingService = trackingService;
             _gymDetailsService = gymDetailsService;
         }
 
