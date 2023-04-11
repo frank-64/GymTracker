@@ -90,6 +90,12 @@ function Dashboard() {
 
     fetchGymDetails();
     fetchGymStatus();
+
+    const interval = setInterval(() => {
+      fetchGymStatus()
+    }, 20000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
