@@ -6,65 +6,96 @@ import { faChartLine } from "@fortawesome/free-solid-svg-icons";
 import { Col, Container, Row, Table, Badge } from "react-bootstrap";
 import { getColorAndText } from "../Helper/helper";
 import Navbar from "../Components/Navbar";
+import { fetchData } from "../Helper/helper";
 
 function Dashboard() {
-  const [occupancyLevel, setOccupancy] = useState(0);
-  const [gymDetails, setGymDetails] = useState('');
+  const [gymDetails, setGymDetails] = useState("");
+  const [gymStatus, setGymStatus] = useState("");
+  const [isOpen, setIsOpen] = useState(true);
+  const [occupancy, setOccupancy] = useState("0");
+  const [nextOpeningHour, setNextOpeningHour] = useState("6:30 AM");
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const getGymDetailsUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
+  const getGymStatusUrl =
+    "https://gym-tracker-functions.azurewebsites.net/api/getGymStatus?";
 
   const [gymOccupancyConfiguration, setGymOccupancyConfiguration] = useState({
     color: "",
     text: "",
   });
 
-  var headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
+  const handleGymDetailsResponse = (gymDetailsObject) => {
+    setGymDetails(gymDetailsObject);
+    determineTomorrowsOpeningHours(gymDetailsObject.OpeningHours);
+  };
+
+  const determineTomorrowsOpeningHours = (openingHours) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDayOfWeek = daysOfWeek[tomorrow.getDay()];
+    const openingHour = openingHours.find(
+      (day) => day.DayOfWeek === tomorrowDayOfWeek
+    );
+    setNextOpeningHour(openingHour.StartTime);
+  };
+
+  const handleGymStatusResponse = (gymStatusObject) => {
+    setGymStatus(gymStatusObject);
+    setIsOpen(gymStatusObject.IsOpen);
+    setOccupancy(gymStatusObject.CapacityPercentage);
+    setGymOccupancyConfiguration(
+      getColorAndText(gymStatusObject.CapacityPercentage)
+    );
+  };
+
+  const handleGymStatusFetchNotOk = () => {
+    //TODO: Add alerts to dashboard
+  };
+
+  const handleGymDetailsFetchNotOk = () => {
+    //TODO: Add alerts to dashboard
+  };
+
+  const handleError = () => {
+    //TODO: Add alerts to dashboard
   };
 
   useEffect(() => {
-
     function fetchGymDetails() {
-      fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?",
-        {
-          mode: "cors",
-          method: "GET",
-          headers: headers,
-        }
-      ).then((response) => {
-        if (response.ok) {
-          response.json().then((json) => {
-            var gymDetailsObject = JSON.parse(json);
-            setGymDetails(gymDetailsObject);
-          });
-        }
-      });
+      fetchData(
+        getGymDetailsUrl,
+        handleGymDetailsResponse,
+        handleGymDetailsFetchNotOk,
+        handleError
+      );
     }
 
-    function fetchGymOccupancy() {
-      fetch(
-        "https://gym-tracker-functions.azurewebsites.net/api/determineGymOccupancy?",
-        {
-          mode: "cors",
-          method: "GET",
-          headers: headers,
-        }
-      ).then((response) => {
-        if (response.ok) {
-          response.json().then((json) => {
-            var occupancyObject = JSON.parse(json);
-            console.log(occupancyObject);
-            setOccupancy(occupancyObject.Percentage);
-            setGymOccupancyConfiguration(
-              getColorAndText(occupancyObject.Percentage)
-            );
-          });
-        }
-      });
+    function fetchGymStatus() {
+      fetchData(
+        getGymStatusUrl,
+        handleGymStatusResponse,
+        handleGymStatusFetchNotOk,
+        handleError
+      );
     }
 
-    fetchGymOccupancy();
     fetchGymDetails();
+    fetchGymStatus();
+
+    const interval = setInterval(() => {
+      fetchGymStatus()
+    }, 20000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -83,8 +114,8 @@ function Dashboard() {
             <div className="subtitle">
               <p>
                 The Gym is currently:{" "}
-                <Badge bg={gymDetails.IsOpen ? "success" : "danger"}>
-                  {gymDetails.IsOpen ? "OPEN" : "CLOSED"}
+                <Badge bg={isOpen ? "success" : "danger"}>
+                  {isOpen ? "OPEN" : "CLOSED"}
                 </Badge>
               </p>
             </div>
@@ -109,11 +140,44 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {gymDetails.Hours?.map((day) => (
+                    {console.log(gymDetails.OpeningHours)}
+                    {console.log(gymStatus)}
+                    {gymDetails.OpeningHours?.map((day) => (
                       <tr key={day.DayOfWeek}>
                         <td>{day.DayOfWeek}</td>
-                        <td>{day.StartTime}</td>
-                        <td>{day.EndTime}</td>
+                        {/* Displaying the custom hours set for the day if they have been set by the admin */}
+                        {gymStatus.CustomOpeningHours ? (
+                          day.DayOfWeek ===
+                          gymStatus.CustomOpeningHours.DayOfWeek ? (
+                            gymStatus.CustomOpeningHours.StartTime ? (
+                              <>
+                                <td>
+                                  {gymStatus.CustomOpeningHours.StartTime}
+                                </td>
+                                <td>{gymStatus.CustomOpeningHours.EndTime}</td>
+                              </>
+                            ) : (
+                              <>
+                                <td>
+                                  <Badge bg={"danger"}>CLOSED</Badge>
+                                </td>
+                                <td>
+                                  <Badge bg={"danger"}>CLOSED</Badge>
+                                </td>
+                              </>
+                            )
+                          ) : (
+                            <>
+                              <td>{day.StartTime}</td>
+                              <td>{day.EndTime}</td>
+                            </>
+                          )
+                        ) : (
+                          <>
+                            <td>{day.StartTime}</td>
+                            <td>{day.EndTime}</td>
+                          </>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -123,14 +187,14 @@ function Dashboard() {
           </Col>
           <Col md={6} className="dashboard-column-right">
             <div className="dashboard-section">
-              {gymDetails.IsOpen ? (
+              {isOpen ? (
                 <div>
                   <ReactSpeedometer
                     segments={5}
                     width={600}
                     height={450}
                     maxValue={100}
-                    value={occupancyLevel}
+                    value={gymStatus.CapacityPercentage}
                     segmentColors={[
                       "green",
                       "limegreen",
@@ -138,7 +202,11 @@ function Dashboard() {
                       "tomato",
                       "firebrick",
                     ]}
-                    currentValueText={`${occupancyLevel}%`}
+                    currentValueText={
+                      gymStatus.CapacityPercentage
+                        ? `${gymStatus.CapacityPercentage}%`
+                        : ""
+                    }
                     customSegmentLabels={[
                       {
                         text: "Very Quiet",
@@ -180,14 +248,15 @@ function Dashboard() {
                       {gymOccupancyConfiguration.text}{" "}
                     </span>
                     <br />
-                    <em>{`${occupancyLevel}% capacity`}</em>
+                    <em>{`${occupancy}% capacity`}</em>
                   </p>
                 </div>
               ) : (
                 <div className="closedGym">
                   {/* TODO: SET NEXT OPEN TIME */}
-                  <h2>Reopen at:</h2>
-                  <p>{"6:30am"}</p>
+                  <p>
+                    Reopen at <Badge bg={"success"}>{nextOpeningHour}</Badge>
+                  </p>
                   <br />
                   <p>Please see opening hours for further details.</p>
                 </div>

@@ -21,8 +21,8 @@ namespace CosmosGettingStartedTutorial
 
         public CosmosRepository()
         {
-            EndpointUri = Environment.GetEnvironmentVariable("endpointUri");
-            PrimaryKey = Environment.GetEnvironmentVariable("primaryKey");
+            EndpointUri = Environment.GetEnvironmentVariable("dbEndpointUri");
+            PrimaryKey = Environment.GetEnvironmentVariable("dbPrimaryKey");
             _cosmosClient = new CosmosClient(EndpointUri, PrimaryKey);
         }
 
@@ -32,63 +32,35 @@ namespace CosmosGettingStartedTutorial
             _database = await _cosmosClient.CreateDatabaseIfNotExistsAsync(databaseId);
         }
 
-        public async Task CreateContainerAsync(string containerId, string partitionKeyFormat)
+        public async Task CreateContainerAsync(string containerId, string partitionKey)
         {
             // Create a new container
-            _container = await _database.CreateContainerIfNotExistsAsync(containerId, partitionKeyFormat);
+            _container = await _database.CreateContainerIfNotExistsAsync(containerId, partitionKey);
         }
 
-        public async Task<ItemResponse<Item>> GetItemAsync<Item>(string partitionKey, string id)
+        public async Task<ItemResponse<Item>> GetItemAsync<Item>(string id, string partitionKey)
         {
-            return await _container.ReadItemAsync<Item>(id, new PartitionKey(partitionKey));
+            // Read the item
+            var response = await _container.ReadItemAsync<Item>(id, new PartitionKey(partitionKey));
+            Console.WriteLine($"Reading an item from the database consumed {response.RequestCharge} RUs.");
+            return response;
         }
 
         public async Task UpsertItemAsync<Item>(Item item)
         {
-            await _container.UpsertItemAsync(item);
+            var response = await _container.UpsertItemAsync(item);
+            Console.WriteLine($"Upserted item to the database consumed {response.RequestCharge} RUs.");
         }
 
-        public async Task AddItemsToContainerAsync(GymDayTracker gymDayTracker)
+        public async Task AddGymDayTrackerToContainerAsync(GymDayTracker gymDayTracker)
         {
-            var item = await GetItemIfExistAsync<GymDayTracker>(gymDayTracker.PartitionKey, gymDayTracker.Id);
-            
-            if (item != null)
+            ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.CreateItemAsync(gymDayTracker, new PartitionKey(gymDayTracker.Month));
+            // Output the RUs (Request Units) used, only for testing purposes
+            Console.WriteLine($"Created item in database with id: {gymDayTrackerResponse.Resource.Id} Operation consumed {gymDayTrackerResponse.RequestCharge} RUs.");
+            if (gymDayTrackerResponse.StatusCode != HttpStatusCode.Created)
             {
-                Console.WriteLine("Item in database with id: {0} already exists\n");
+                throw new Exception($"Failed to create item with id: {gymDayTracker.Id}. StatusCode: {gymDayTrackerResponse.StatusCode}");
             }
-            else
-            {
-                try
-                {
-                    ItemResponse<GymDayTracker> gymDayTrackerResponse = await _container.CreateItemAsync(gymDayTracker, new PartitionKey(gymDayTracker.PartitionKey));
-                    // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse. We can also access the RequestCharge property to see the amount of RUs consumed on this request.
-                    Console.WriteLine("Created item in database with id: {0} Operation consumed {1} RUs.\n", gymDayTrackerResponse.Resource.Id, gymDayTrackerResponse.RequestCharge);
-
-                }catch(Exception ex)
-                {
-                    var t = ex.Message;
-                }
-            }
-        }
-
-        public async Task<ItemResponse<Item>> GetItemIfExistAsync<Item>(string partitionKey, string id)
-        {
-            try
-            {
-                // Read the item to see if it exists.  
-                ItemResponse<Item> response = await _container.ReadItemAsync<Item>(id, new PartitionKey(partitionKey));
-                return response;
-            }
-            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-        }
-
-        public async Task DeleteItemAsync<Item>(string partitionKey, string id)
-        {
-            ItemResponse<Item> deletedResponse = await _container.DeleteItemAsync<Item>(id,new PartitionKey(partitionKey));
-            Console.WriteLine("Deleted Family [{0},{1}]\n", partitionKey, id);
         }
     }
 }

@@ -16,6 +16,22 @@
   color: white;
 }
 
+.custom-opening-hour-card{
+  width: 500px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-custom-closure-form{
+  color: rgb(2, 2, 2);
+}
+
+.form-button{
+  margin-top: 20px;
+  text-align: center;
+}
+
 td:first-child {
   text-align: left;
 }
@@ -23,6 +39,10 @@ td:first-child {
 p {
   color: white;
   font-size: calc(10px + 2vmin);
+}
+
+.custom-opening-hour{
+  color: rgb(2, 2, 2);
 }
 
 .subtitle-row {
