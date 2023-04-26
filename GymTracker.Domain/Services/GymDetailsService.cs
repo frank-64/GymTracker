@@ -134,7 +134,7 @@ namespace GymTracker.Domain.Services
                     AdminClosedGym = !customOpeningHour.IsOpen,
                     CustomOpeningHours = customOpeningHour.IsOpen ? openingHours : null
                 };
-                await _cosmosRepository.AddGymDayTrackerToContainerAsync(gymDayTracker);
+                await _cosmosRepository.AddItemToContainerAsync(gymDayTracker, gymDayTracker.Month);
             }
             else
             {

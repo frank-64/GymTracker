@@ -86,8 +86,8 @@ namespace GymTracker.Functions
         }
 
         //TODO: Uncomment when entry/exit events are setup
-        //[FunctionName("UpdateDailyGymInsights")]
-        //public async Task UpdateDailyGymInsights([TimerTrigger("0 0 * * * *")] TimerInfo myTimer, ILogger log) // This will run every hour on the hour.
+        //[FunctionName("UpdateHourlyGymInsights")]
+        //public async Task UpdateHourlyGymInsights([TimerTrigger("0 0 * * * *")] TimerInfo myTimer, ILogger log) // This will run every hour on the hour.
         //{
         //    log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
         //    await _trackingService.UpdateHourlyGymInsightsAsync();

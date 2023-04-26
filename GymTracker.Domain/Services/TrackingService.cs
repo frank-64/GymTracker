@@ -59,7 +59,7 @@ namespace GymTracker.Domain.Services
 					IsOpen = false,
 					AdminClosedGym = false
 				};
-				await _cosmosRepository.AddGymDayTrackerToContainerAsync(gymDayTracker); // GymDayTracker file already exists
+				await _cosmosRepository.AddItemToContainerAsync(gymDayTracker, gymDayTracker.Month); // GymDayTracker file already exists
 			}
 			else
 			{
