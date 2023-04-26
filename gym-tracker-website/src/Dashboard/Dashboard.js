@@ -23,6 +23,33 @@ function Dashboard() {
     "Friday",
     "Saturday",
   ];
+  const customSegmentLabels = [
+    {
+      text: "Very Quiet",
+      position: "OUTSIDE",
+      color: "#ffffff",
+    },
+    {
+      text: "Quiet",
+      position: "OUTSIDE",
+      color: "#ffffff",
+    },
+    {
+      text: "Moderate",
+      position: "OUTSIDE",
+      color: "#ffffff",
+    },
+    {
+      text: "Busy",
+      position: "OUTSIDE",
+      color: "#ffffff",
+    },
+    {
+      text: "Very Busy",
+      position: "OUTSIDE",
+      color: "#ffffff",
+    },
+  ];
   const getGymDetailsUrl =
     "https://gym-tracker-functions.azurewebsites.net/api/getGymDetails?";
   const getGymStatusUrl =
@@ -92,7 +119,7 @@ function Dashboard() {
     fetchGymStatus();
 
     const interval = setInterval(() => {
-      fetchGymStatus()
+      fetchGymStatus();
     }, 20000);
 
     return () => clearInterval(interval);
@@ -140,8 +167,6 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {console.log(gymDetails.OpeningHours)}
-                    {console.log(gymStatus)}
                     {gymDetails.OpeningHours?.map((day) => (
                       <tr key={day.DayOfWeek}>
                         <td>{day.DayOfWeek}</td>
@@ -202,40 +227,11 @@ function Dashboard() {
                       "tomato",
                       "firebrick",
                     ]}
-                    currentValueText={
-                      gymStatus.CapacityPercentage
-                        ? `${gymStatus.CapacityPercentage}%`
-                        : ""
-                    }
-                    customSegmentLabels={[
-                      {
-                        text: "Very Quiet",
-                        position: "OUTSIDE",
-                        color: "#ffffff",
-                      },
-                      {
-                        text: "Quiet",
-                        position: "OUTSIDE",
-                        color: "#ffffff",
-                      },
-                      {
-                        text: "Moderate",
-                        position: "OUTSIDE",
-                        color: "#ffffff",
-                      },
-                      {
-                        text: "Busy",
-                        position: "OUTSIDE",
-                        color: "#ffffff",
-                      },
-                      {
-                        text: "Very Busy",
-                        position: "OUTSIDE",
-                        color: "#ffffff",
-                      },
-                    ]}
+                    currentValueText={gymStatus.CapacityPercentage ? `${gymStatus.CapacityPercentage}%` : ""}
+                    customSegmentLabels={customSegmentLabels}
                   />
                   <p>
+
                     Gym occupancy status is{" "}
                     <span
                       style={{
@@ -253,7 +249,6 @@ function Dashboard() {
                 </div>
               ) : (
                 <div className="closedGym">
-                  {/* TODO: SET NEXT OPEN TIME */}
                   <p>
                     Reopen at <Badge bg={"success"}>{nextOpeningHour}</Badge>
                   </p>

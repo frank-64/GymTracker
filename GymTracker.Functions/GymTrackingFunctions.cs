@@ -16,12 +16,10 @@ namespace GymTracker.Functions
     public class GymTrackingFunctions
     {
         private readonly ITrackingService _trackingService;
-        private readonly IGymDetailsService _gymDetailsService;
 
-        public GymTrackingFunctions(ITrackingService trackingService, IGymDetailsService gymDetailsService)
+        public GymTrackingFunctions(ITrackingService trackingService)
         {
             _trackingService = trackingService;
-            _gymDetailsService = gymDetailsService;
         }
 
         [FunctionName("GetGymStatus")]
