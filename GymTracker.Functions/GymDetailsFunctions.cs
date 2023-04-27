@@ -88,7 +88,7 @@ namespace GymTracker.Functions
             bool loginResult = false;
             try
             {
-                loginResult = await _gymDetailsService.AdminLogin(credentials);
+                loginResult = await _gymDetailsService.AdminLoginAsync(credentials);
             }
             catch (Exception e)
             {

@@ -73,7 +73,7 @@ namespace GymTracker.Domain.Services
             await _blobRepository.UploadBlobAsync(currentGymDetails, blobName);
         }
 
-        public async Task<bool> AdminLogin(Credentials credentials)
+        public async Task<bool> AdminLoginAsync(Credentials credentials)
         {
             await _cosmosRepository.CreateDatabaseAsync(adminDatabaseId);
             await _cosmosRepository.CreateContainerAsync(adminContainerId, "/id");
