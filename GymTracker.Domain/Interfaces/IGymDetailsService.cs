@@ -8,7 +8,7 @@ namespace GymTracker.Domain.Interfaces
         public Task<bool> DetermineGymStatus(Day day);
         public Task<int> GetMaximumOccupancy();
         public Task UpdateGymDetails(GymDetails updatedGymDetails);
-        public Task<bool> AdminLogin(Credentials credentials);
+        public Task<bool> AdminLoginAsync(Credentials credentials);
         public Task SetCustomOpeningPeriod(Day customOpeningHour);
     }
 }

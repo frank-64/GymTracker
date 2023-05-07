@@ -16,12 +16,10 @@ namespace GymTracker.Functions
     public class GymTrackingFunctions
     {
         private readonly ITrackingService _trackingService;
-        private readonly IGymDetailsService _gymDetailsService;
 
-        public GymTrackingFunctions(ITrackingService trackingService, IGymDetailsService gymDetailsService)
+        public GymTrackingFunctions(ITrackingService trackingService)
         {
             _trackingService = trackingService;
-            _gymDetailsService = gymDetailsService;
         }
 
         [FunctionName("GetGymStatus")]
@@ -88,8 +86,8 @@ namespace GymTracker.Functions
         }
 
         //TODO: Uncomment when entry/exit events are setup
-        //[FunctionName("UpdateDailyGymInsights")]
-        //public async Task UpdateDailyGymInsights([TimerTrigger("0 0 * * * *")] TimerInfo myTimer, ILogger log) // This will run every hour on the hour.
+        //[FunctionName("UpdateHourlyGymInsights")]
+        //public async Task UpdateHourlyGymInsights([TimerTrigger("0 0 * * * *")] TimerInfo myTimer, ILogger log) // This will run every hour on the hour.
         //{
         //    log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
         //    await _trackingService.UpdateHourlyGymInsightsAsync();

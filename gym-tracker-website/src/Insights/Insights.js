@@ -39,11 +39,9 @@ function Insights() {
   };
 
   const handleGymStatusFetchNotOk = () => {
-    //TODO: Add alerts to dashboard
   };
 
   const handleError = () => {
-    //TODO: Add alerts to dashboard
   };
 
   useEffect(() => {

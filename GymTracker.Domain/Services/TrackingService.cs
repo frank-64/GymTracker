@@ -59,7 +59,7 @@ namespace GymTracker.Domain.Services
 					IsOpen = false,
 					AdminClosedGym = false
 				};
-				await _cosmosRepository.AddGymDayTrackerToContainerAsync(gymDayTracker); // GymDayTracker file already exists
+				await _cosmosRepository.AddItemToContainerAsync(gymDayTracker, gymDayTracker.Month); // GymDayTracker file already exists
 			}
 			else
 			{
@@ -98,10 +98,11 @@ namespace GymTracker.Domain.Services
 
 			foreach (Equipment equipment in gymDetails.Equipment)
             {
-				equipment.EstimateEquipmentAvailability(gymStatus.CapacityPercentage);
+				equipment.EstimateEquipmentCapacity(gymStatus.CapacityPercentage);
 			}
 
-			return new GymInsightsDTO { DayOfWeek = currentDayOfWeek, AverageDailyPeakOccupancy = dailyPeakOccupancyAverages, AverageHourlyPeakOccupancy = hourlyPeakOccupancyAverages, EquipmentUsage = gymDetails.Equipment};
+			return new GymInsightsDTO { DayOfWeek = currentDayOfWeek, AverageDailyPeakOccupancy = dailyPeakOccupancyAverages, 
+				AverageHourlyPeakOccupancy = hourlyPeakOccupancyAverages, EquipmentUsage = gymDetails.Equipment};
 		}
 
 		private void PrepareDailyPeakOccupancyData(List<PeakOccupancyDTO> dailyPeakOccupancyAverages, List<GymInsights> gymInsights, int maxOccupancy)

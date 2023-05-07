@@ -174,7 +174,6 @@ function Admin() {
   };
 
   const handleGymStatusResponse = (response) => {
-    console.log(response);
     setGymStatus(response);
   };
 
@@ -203,7 +202,6 @@ function Admin() {
   const handleNotOk = () => {};
 
   function postCustomGymOpeningPeriod(customOpeningPeriod) {
-    console.log(customOpeningPeriod);
     var body = JSON.stringify(customOpeningPeriod);
     postData(
       postCustomGymOpeningPeriodURL,
@@ -261,12 +259,17 @@ function Admin() {
 
   // Redirect the user back to the login page if they no longer have a token or it has expired
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token || tokenExpired(token)) {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token || tokenExpired(token)) {
+        setLoggedIn(false);
+        navigate("/admin-login");
+      } else {
+        setLoggedIn(true);
+      }
+    } catch (error) {
       setLoggedIn(false);
       navigate("/admin-login");
-    } else {
-      setLoggedIn(true);
     }
   }, [navigate]);
 

@@ -13,7 +13,7 @@ namespace GymTracker.Domain.Entities
         public double RelativeDemand { get; set; }
         public double UsagePercentage { get; set; }
 
-		public void EstimateEquipmentAvailability(double currentCapacity)
+		public void EstimateEquipmentCapacity(double currentCapacity)
 		{
 			// Calculate the maximum number of users that can use the equipment
 			int maxUsers = (int)(Quantity * (currentCapacity / 100));
