@@ -84,14 +84,11 @@ function Dashboard() {
     );
   };
 
-  const handleGymStatusFetchNotOk = () => {
-  };
+  const handleGymStatusFetchNotOk = () => {};
 
-  const handleGymDetailsFetchNotOk = () => {
-  };
+  const handleGymDetailsFetchNotOk = () => {};
 
-  const handleError = () => {
-  };
+  const handleError = () => {};
 
   useEffect(() => {
     function fetchGymDetails() {
@@ -117,7 +114,7 @@ function Dashboard() {
 
     const interval = setInterval(() => {
       fetchGymStatus();
-    }, 20000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
@@ -224,11 +221,14 @@ function Dashboard() {
                       "tomato",
                       "firebrick",
                     ]}
-                    currentValueText={gymStatus.CapacityPercentage ? `${gymStatus.CapacityPercentage}%` : ""}
+                    currentValueText={
+                      gymStatus.CapacityPercentage
+                        ? `${gymStatus.CapacityPercentage}%`
+                        : ""
+                    }
                     customSegmentLabels={customSegmentLabels}
                   />
                   <p>
-
                     Gym occupancy status is{" "}
                     <span
                       style={{
