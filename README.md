@@ -16,3 +16,6 @@ This is a web app that provides real-time occupancy status for a gym using webho
 * Cosmos DB database for scalable and cost-effective data storage
 * Graphs of occupancy for past week's busiest days and hours
 * Equipment availability estimations for informed workout planning
+
+# Infrastructure Architectural Design
+![image](https://github.com/frank-64/GymTracker/assets/68070161/62474e55-34f0-4821-a2c2-d0e41b8cc4d9)
